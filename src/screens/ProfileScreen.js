@@ -6,12 +6,12 @@ import { useFontSettings } from '../contexts/FontContext';
 import { User, CirclePower, Key } from 'lucide-react-native';
 import CustomAlert from '../components/CustomAlert';
 import PasswordModal from '../components/PasswordModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const theme = useTheme();
   const { fontSize } = useFontSettings();
-
   const [userData, setUserData] = useState({
     nome: '',
     email: '',
@@ -40,14 +40,23 @@ export default function ProfileScreen() {
   const fetchUserData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://randomuser.me/api/');
+      const response = await fetch('http://localhost:3000/api/usuario/me', {
+        headers: {
+          'Content-Type': 'application/json',
+          'access-token': await AsyncStorage.getItem('token')
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Erro ao buscar usuário');
+      }
       const data = await response.json();
-      const user = data.results[0];
-
+      const user = Array.isArray(data.results) ? data.results[0] : data; // adapte se a estrutura do retorno for diferente
+  
       setUserData({
-        nome: `${user.name.first} ${user.name.last}`,
+        nome: user.nome,
         email: user.email,
-        profileImage: user.picture.large,
+        profileImage: 'https://randomuser.me/api/portraits/lego/1.jpg',
       });
     } catch (error) {
       console.error('Erro ao obter os dados do usuário:', error);
@@ -62,6 +71,7 @@ export default function ProfileScreen() {
       setIsLoading(false);
     }
   };
+  
 
   // Função genérica para mostrar alertas, agora com controle de botão único
   const showAlert = ({

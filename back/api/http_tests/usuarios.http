@@ -17,7 +17,14 @@ Content-Type: application/json
 // GET - Lista todos os usuários
 GET {{baseURL}}
 Content-Type: application/json
-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjp7ImlkIjoiNjY2NzdjZjgwZThjNDFlOTgxZmI2ZWJkIiwidGlwbyI6IkNsaWVudGUifSwiaWF0IjoxNzE4MDYwMzE2LCJleHAiOjE3MTgxNDY3MTZ9.JjilH0-i9kJ-sWG_Bpc5jQ0VDaG-wuCx3K1MMO6zn7I
+access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjp7ImlkIjoiNjY0NTUzNDY3OTBiYWI0YzhkNTNiNGFhIiwidGlwbyI6IkFkbWluIn0sImlhdCI6MTc0NjY0MDQ4OSwiZXhwIjoxNzQ2NzI2ODg5fQ.N0Aws-DT00qPEhwL0uAHDORlEHSjnsNCSJUbiWoZISM
+
+###
+
+GET {{baseURL}}/me
+Content-Type: application/json
+access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjp7ImlkIjoiNjY0NTUzNDY3OTBiYWI0YzhkNTNiNGFhIiwidGlwbyI6IkFkbWluIn0sImlhdCI6MTc0NjY0MDQ4OSwiZXhwIjoxNzQ2NzI2ODg5fQ.N0Aws-DT00qPEhwL0uAHDORlEHSjnsNCSJUbiWoZISM
+
 
 ###
 // POST - Efetua o login

@@ -358,4 +358,32 @@ router.delete("/:id", auth, async (req, res) => {
     res.status(200).send(result);
   }
 });
+
+router.get("/me", auth, async (req, res) => {
+  /*
+        #swagger.tags = ['Usuário']
+        #swagger.summary = 'GET do usuário logado'
+        #swagger.description = 'Retorna os dados do usuário autenticado pelo token JWT'
+        #swagger.security = [{
+                "apiKeyAuth": []
+            }]
+    */
+  try {
+    const usuario = await db
+      .collection(nomeCollection)
+      .findOne({ _id: new ObjectId(req.usuario.id) }, { projection: { senha: 0 } });
+
+    if (!usuario) {
+      return res.status(404).json({ msg: "Usuário não encontrado" });
+    }
+
+    res.status(200).json(usuario);
+  } catch (err) {
+    res.status(500).json({
+      msg: "Erro ao buscar dados do usuário logado",
+      error: err.message,
+    });
+  }
+});
+
 export default router;
