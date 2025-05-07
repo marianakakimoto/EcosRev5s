@@ -1,17 +1,17 @@
-//src\screens\RegisterScreen.js
+// src/components/RegisterForm.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { registerSchema } from '../utils/validationSchemas';
-import AuthForm from '../components/AuthForm';
+import AuthForm from './AuthForm';
 
-export default function Register() {
+export default function RegisterForm({ onClose }) {
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
-  const theme = useTheme(); // Tema
-  const { fontSize } = useFontSettings(); // Fonte
+  const theme = useTheme();
+  const { fontSize } = useFontSettings();
 
   const handleRegister = async (values) => {
     try {
@@ -27,24 +27,22 @@ export default function Register() {
           tipo: "Cliente",
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         const errorMsg = data.errors?.map(e => e.msg).join("\n") || "Erro ao cadastrar usuário.";
         alert(errorMsg);
         return;
       }
-  
+
       alert("Cadastro realizado com sucesso!");
-      navigation.navigate("Login");
-  
+      onClose(); // Fecha o modal após o registro
     } catch (error) {
       console.error("Erro no cadastro:", error);
       alert("Erro na conexão com o servidor.");
     }
   };
-  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -57,7 +55,7 @@ export default function Register() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View>
       <Text style={[styles.title, { color: theme.colors.primary, fontSize: fontSize.xl }]}>Cadastro</Text>
 
       <AuthForm
@@ -68,43 +66,29 @@ export default function Register() {
         isPasswordVisible={showPassword}
         togglePasswordVisibility={togglePasswordVisibility}
       >
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: theme.colors.primary }]}
-          onPress={() => { }}
-        >
-          <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>Cadastrar</Text>
-        </TouchableOpacity>
+        {({ handleSubmit }) => (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+            onPress={handleSubmit}
+          >
+            <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>Cadastrar</Text>
+          </TouchableOpacity>
+        )}
       </AuthForm>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Login')}
-        style={styles.link}
-      >
+      <TouchableOpacity onPress={onClose} style={styles.link}>
         <Text style={[styles.linkText, { color: theme.colors.primary, fontSize: fontSize.sm }]}>Já tem uma conta? Faça login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Home')}
-        style={styles.link}
-      >
-        <Text style={[styles.linkText, { color: theme.colors.primary, fontSize: fontSize.sm }]}>
-          Voltar para Home
-        </Text>
-      </TouchableOpacity>
-
+      {/* Removi o botão de voltar para Home, pois agora está dentro do modal de login */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
   title: {
     fontWeight: 'bold',
-    marginTop: 60,
-    marginBottom: 40,
+    marginBottom: 30,
     textAlign: 'center',
   },
   button: {

@@ -1,13 +1,13 @@
-//src\screens\ForgotPassword.js
+// src/components/ForgotPasswordForm.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { forgotPasswordSchema } from '../utils/validationSchemas';
-import AuthForm from '../components/AuthForm';
+import AuthForm from './AuthForm';
 
-export default function ForgotPasswordScreen() {
+export default function ForgotPasswordForm({ onClose }) {
   const navigation = useNavigation();
   const [feedback, setFeedback] = useState(null);
   const theme = useTheme();
@@ -20,6 +20,7 @@ export default function ForgotPasswordScreen() {
       type: 'success',
       message: 'Uma senha temporária foi enviada para seu email.',
     });
+    // Após o envio, você pode fechar o modal ou exibir outra mensagem
   };
 
   const forgotPasswordFields = [
@@ -27,7 +28,7 @@ export default function ForgotPasswordScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View>
       <Text style={[styles.title, { color: theme.colors.primary, fontSize: fontSize.xl }]}>Recuperar Senha</Text>
 
       <AuthForm
@@ -39,14 +40,16 @@ export default function ForgotPasswordScreen() {
         togglePasswordVisibility={() => {}}
         errorMessages={feedback && feedback.type === 'error' ? { email: feedback.message } : null}
       >
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: theme.colors.primary }]}
-          onPress={() => {}}
-        >
-          <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
-            Enviar
-          </Text>
-        </TouchableOpacity>
+        {({ handleSubmit }) => (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+            onPress={handleSubmit}
+          >
+            <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
+              Enviar
+            </Text>
+          </TouchableOpacity>
+        )}
       </AuthForm>
 
       {feedback && feedback.type === 'success' && (
@@ -55,7 +58,7 @@ export default function ForgotPasswordScreen() {
         </Text>
       )}
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.link}>
+      <TouchableOpacity onPress={onClose} style={styles.link}>
         <Text style={[styles.linkText, { color: theme.colors.primary, fontSize: fontSize.sm }]}>
           Voltar para o login
         </Text>
@@ -65,11 +68,6 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
   title: {
     fontWeight: 'bold',
     marginBottom: 30,

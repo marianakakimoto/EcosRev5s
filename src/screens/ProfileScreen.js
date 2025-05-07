@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
-import { User, CirclePower, Eye, EyeOff, Key, Save, X } from 'lucide-react-native';
+import { User, CirclePower, Key } from 'lucide-react-native';
 import CustomAlert from '../components/CustomAlert';
+import PasswordModal from '../components/PasswordModal';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -17,13 +18,7 @@ export default function ProfileScreen() {
     profileImage: '',
   });
 
-  const [passwordAtual, setPasswordAtual] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [showPasswordAtual, setShowPasswordAtual] = useState(true); // Inicialmente oculto
-  const [showNovaSenha, setShowNovaSenha] = useState(true);     // Inicialmente oculto
-  const [showConfirmarNovaSenha, setShowConfirmarNovaSenha] = useState(true); // Inicialmente oculto
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Estados para os CustomAlerts
@@ -69,12 +64,12 @@ export default function ProfileScreen() {
   };
 
   // Função genérica para mostrar alertas, agora com controle de botão único
-  const showAlert = ({ 
-    title, 
-    message, 
-    confirmText = 'OK', 
-    cancelText = 'Cancelar', 
-    onConfirm = () => {}, 
+  const showAlert = ({
+    title,
+    message,
+    confirmText = 'OK',
+    cancelText = 'Cancelar',
+    onConfirm = () => {},
     confirmColor = theme.colors.primary,
     showCancelButton = true
   }) => {
@@ -92,60 +87,6 @@ export default function ProfileScreen() {
         onConfirm();
       }
     });
-  };
-
-  const handleSavePassword = () => {
-    if (!passwordAtual || !novaSenha || !confirmarNovaSenha) {
-      showAlert({ 
-        title: 'Erro', 
-        message: 'Todos os campos são obrigatórios.', 
-        confirmColor: theme.colors.error, 
-        showCancelButton: false 
-      });
-      return;
-    }
-    if (novaSenha !== confirmarNovaSenha) {
-      showAlert({ 
-        title: 'Erro', 
-        message: 'As senhas não coincidem.', 
-        confirmColor: theme.colors.error, 
-        showCancelButton: false 
-      });
-      return;
-    }
-    if (novaSenha.length < 6) {
-      showAlert({ 
-        title: 'Erro', 
-        message: 'A senha deve ter pelo menos 6 caracteres.', 
-        confirmColor: theme.colors.error, 
-        showCancelButton: false 
-      });
-      return;
-    }
-    console.log('Senha Atual:', passwordAtual);
-    console.log('Nova Senha:', novaSenha);
-    console.log('Confirmar Nova Senha:', confirmarNovaSenha);
-    showAlert({ 
-      title: 'Sucesso', 
-      message: 'Senha alterada com sucesso.', 
-      confirmColor: theme.colors.sucess, 
-      showCancelButton: false 
-    });
-    setPasswordAtual('');
-    setNovaSenha('');
-    setConfirmarNovaSenha('');
-    setShowModal(false);
-  };
-
-  // Função para limpar os inputs ao fechar/sair do modal
-  const closeModal = () => {
-    setShowModal(false);
-    setPasswordAtual('');
-    setNovaSenha('');
-    setConfirmarNovaSenha('');
-    setShowPasswordAtual(true);
-    setShowNovaSenha(true);
-    setShowConfirmarNovaSenha(true);
   };
 
   const handleLogout = () => {
@@ -229,7 +170,7 @@ export default function ProfileScreen() {
           <View style={[styles.passwordContainer, { backgroundColor: theme.colors.cardAlt || theme.colors.surface }]}>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: theme.colors.primary }]}
-              onPress={() => setShowModal(true)}
+              onPress={() => setShowPasswordModal(true)}
             >
               <Key size={24} color={theme.colors.text.inverse} style={{ marginRight: 8 }} />
               <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
@@ -250,112 +191,23 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <Modal visible={showModal} animationType="slide" transparent>
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalContainer}>
-            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
-                <View style={styles.modalHeader}>
-                  <Text style={[styles.modalTitle, { color: theme.colors.primary, fontSize: fontSize.lg }]}>
-                    Alterar Senha
-                  </Text>
-                  <TouchableOpacity style={styles.closeModalButton} onPress={closeModal}>
-                    <X size={24} color={theme.colors.text.primary} />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={[styles.label, { color: theme.colors.text.secondary, fontSize: fontSize.md }]}>
-                    Senha Atual
-                  </Text>
-                  <View style={[styles.passwordInputContainer, { borderColor: theme.colors.border }]}>
-                    <TextInput
-                      style={[styles.passwordInput, { color: theme.colors.text.primary, fontSize: fontSize.md }]}
-                      placeholder="Digite sua senha atual"
-                      placeholderTextColor={theme.colors.text.secondary}
-                      secureTextEntry={showPasswordAtual}
-                      value={passwordAtual}
-                      onChangeText={setPasswordAtual}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => setShowPasswordAtual(!showPasswordAtual)}
-                    >
-                      {!showPasswordAtual ? (
-                        <Eye size={20} color={theme.colors.text.secondary} />
-                      ) : (
-                        <EyeOff size={20} color={theme.colors.text.secondary} />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={[styles.label, { color: theme.colors.text.secondary, fontSize: fontSize.md }]}>
-                    Nova Senha
-                  </Text>
-                  <View style={[styles.passwordInputContainer, { borderColor: theme.colors.border }]}>
-                    <TextInput
-                      style={[styles.passwordInput, { color: theme.colors.text.primary, fontSize: fontSize.md }]}
-                      placeholder="Digite sua nova senha"
-                      placeholderTextColor={theme.colors.text.secondary}
-                      secureTextEntry={showNovaSenha}
-                      value={novaSenha}
-                      onChangeText={setNovaSenha}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => setShowNovaSenha(!showNovaSenha)}
-                    >
-                      {!showNovaSenha ? (
-                        <Eye size={20} color={theme.colors.text.secondary} />
-                      ) : (
-                        <EyeOff size={20} color={theme.colors.text.secondary} />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={[styles.label, { color: theme.colors.text.secondary, fontSize: fontSize.md }]}>
-                    Confirmar Nova Senha
-                  </Text>
-                  <View style={[styles.passwordInputContainer, { borderColor: theme.colors.border }]}>
-                    <TextInput
-                      style={[styles.passwordInput, { color: theme.colors.text.primary, fontSize: fontSize.md }]}
-                      placeholder="Confirme sua nova senha"
-                      placeholderTextColor={theme.colors.text.secondary}
-                      secureTextEntry={showConfirmarNovaSenha}
-                      value={confirmarNovaSenha}
-                      onChangeText={setConfirmarNovaSenha}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => setShowConfirmarNovaSenha(!showConfirmarNovaSenha)}
-                    >
-                      {!showConfirmarNovaSenha ? (
-                        <Eye size={20} color={theme.colors.text.secondary} />
-                      ) : (
-                        <EyeOff size={20} color={theme.colors.text.secondary} />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  style={[styles.saveButton, { backgroundColor: theme.colors.primary }]}
-                  onPress={handleSavePassword}
-                >
-                  <Save size={24} color={theme.colors.text.inverse} style={{ marginRight: 8 }} />
-                  <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
-                    Salvar Senha
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <PasswordModal
+        isVisible={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSave={() => {
+          // Lógica para salvar a senha (você pode passar uma função aqui)
+          showAlert({
+            title: 'Sucesso',
+            message: 'Senha alterada com sucesso.',
+            confirmColor: theme.colors.sucess,
+            showCancelButton: false,
+          });
+          setShowPasswordModal(false);
+        }}
+        theme={theme}
+        fontSize={fontSize}
+        showAlert={showAlert}
+      />
 
       {/* CustomAlert Component */}
       <CustomAlert
@@ -458,51 +310,5 @@ const styles = StyleSheet.create({
   logoutText: {
     marginLeft: 10,
     fontWeight: 'bold',
-  },
-  saveButton: {
-    flexDirection: 'row',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-    alignSelf: 'center'
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    padding: 20,
-    borderRadius: 15,
-    width: '90%',
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  closeModalButton: {
-    padding: 5,
-  },
-  passwordInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-  },
-  eyeIcon: {
-    padding: 10,
   },
 });
