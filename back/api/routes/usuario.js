@@ -386,4 +386,54 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+router.put("/senha", auth, [
+  check("senhaAtual").notEmpty().withMessage("A senha atual é obrigatória"),
+  check("novaSenha")
+    .notEmpty()
+    .withMessage("A nova senha é obrigatória")
+    .isLength({ min: 6 })
+    .withMessage("A senha deve ter no mínimo 6 caracteres")
+    .isStrongPassword({
+      minLength: 6,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })
+    .withMessage("A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo")
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { senhaAtual, novaSenha } = req.body;
+  const userId = req.usuario.id;
+
+  try {
+    const usuario = await db.collection(nomeCollection).findOne({ _id: new ObjectId(userId) });
+    if (!usuario) {
+      return res.status(404).json({ msg: "Usuário não encontrado" });
+    }
+
+    const senhaCorreta = await bcrypt.compare(senhaAtual, usuario.senha);
+    if (!senhaCorreta) {
+      return res.status(403).json({ msg: "Senha atual incorreta" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const senhaHash = await bcrypt.hash(novaSenha, salt);
+
+    await db.collection(nomeCollection).updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { senha: senhaHash } }
+    );
+
+    res.status(200).json({ msg: "Senha atualizada com sucesso" });
+  } catch (err) {
+    res.status(500).json({ msg: "Erro ao atualizar a senha", error: err.message });
+  }
+});
+
+
 export default router;

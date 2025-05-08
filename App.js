@@ -7,15 +7,12 @@ import { FontSettingsProvider } from "./src/contexts/FontContext";
 import LoadingScreen from "./src/screens/LoadingScreen";
 import { AppStack, AuthStack } from "./src/configs/navigation";
 import { Provider as PaperProvider } from 'react-native-paper';
+import { AuthProvider } from "./src/contexts/AuthContext"; // ✅ Importar aqui
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
-    // "Roboto": require("./assets/fonts/Roboto-Regular.ttf"),
-    // "OpenSans": require("./assets/fonts/OpenSans-Regular.ttf"),
-    // "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
   });
 
   useEffect(() => {
@@ -26,25 +23,29 @@ export default function App() {
 
   if (isLoading || !fontsLoaded) {
     return (
-      <ThemeProvider>
-        <FontSettingsProvider>
-          <PaperProvider>
-            <LoadingScreen />
-          </PaperProvider>
-        </FontSettingsProvider>
-      </ThemeProvider>
+      <AuthProvider> {/* ✅ Envolver também a tela de loading */}
+        <ThemeProvider>
+          <FontSettingsProvider>
+            <PaperProvider>
+              <LoadingScreen />
+            </PaperProvider>
+          </FontSettingsProvider>
+        </ThemeProvider>
+      </AuthProvider>
     );
   }
 
   return (
-    <ThemeProvider>
-      <FontSettingsProvider>
-        <PaperProvider>
-          <NavigationContainer>
-            {isAuthenticated ? <AppStack /> : <AuthStack />}
-          </NavigationContainer>
-        </PaperProvider>
-      </FontSettingsProvider>
-    </ThemeProvider>
+    <AuthProvider> {/* ✅ Isso permite o uso do useAuth() em qualquer lugar */}
+      <ThemeProvider>
+        <FontSettingsProvider>
+          <PaperProvider>
+            <NavigationContainer>
+              <AppStack /> {/* ou <AuthStack /> se usar isAuthenticated do contexto */}
+            </NavigationContainer>
+          </PaperProvider>
+        </FontSettingsProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

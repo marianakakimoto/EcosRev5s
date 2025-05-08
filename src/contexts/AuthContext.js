@@ -1,39 +1,65 @@
-//src\contexts\AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthContext = createContext();
 
+const TOKEN_KEY = "token";
+
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState(null); // Adicionando token ao estado
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken"); // Busca token no armazenamento
-      setIsAuthenticated(!!token); // Se existir um token, está autenticado
-      setIsLoading(false);
+      try {
+        const savedToken = await AsyncStorage.getItem(TOKEN_KEY);
+        if (savedToken) {
+          setToken(savedToken);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     checkAuth();
   }, []);
 
-  const login = async (token) => {
-    await AsyncStorage.setItem("userToken", token); // Salva o token ao logar
-    setIsAuthenticated(true);
+  const login = async (newToken) => {
+    try {
+      await AsyncStorage.setItem(TOKEN_KEY, newToken);
+      setToken(newToken);
+      setIsAuthenticated(true);
+      return true;
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      return false;
+    }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem("userToken"); // Remove o token ao deslogar
-    setIsAuthenticated(false);
+    try {
+      await AsyncStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+      setIsAuthenticated(false);
+      return true;
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      return false;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, token }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook personalizado para acessar o contexto
 export const useAuth = () => useContext(AuthContext);
+
+// Exportando também o contexto para manter compatibilidade com código existente
+export { AuthContext };

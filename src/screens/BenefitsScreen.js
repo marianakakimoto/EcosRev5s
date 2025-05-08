@@ -1,52 +1,180 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Gift, Ticket } from "lucide-react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import { useFontSettings } from "../contexts/FontContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomAlert from "../components/CustomAlert";
-
-const benefitsData = [
-  { id: 1, title: "Cupom Desconto Magalu", points: 500, description: "Cupom de R$ 50 para compras na Magalu" },
-  { id: 2, title: "Créditos Uber", points: 750, description: "Créditos de R$ 75 para corridas Uber" },
-  { id: 3, title: "Voucher Netflix", points: 1000, description: "Voucher de 3 meses de Netflix" },
-  { id: 4, title: "Créditos iFood", points: 600, description: "Créditos de R$ 60 para pedidos no iFood" },
-];
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BenefitsScreen = () => {
-  const [userPoints, setUserPoints] = useState(2500);
+  const [userPoints, setUserPoints] = useState(0);
+  const [benefits, setBenefits] = useState([]);
   const [alertVisible, setAlertVisible] = useState(false);
   const [selectedBenefit, setSelectedBenefit] = useState(null);
   const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const { fontSize } = useFontSettings();
 
+  // API base URL
+  const API_URL = "http://localhost:3000/api";
+
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      return token;
+    } catch (error) {
+      console.error("Error getting token:", error);
+      return null;
+    }
+  };
+
+  const fetchUserPoints = async () => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/usuario/pontos`, {
+        headers: { "access-token": token }
+      });
+      
+      if (response.data && response.data.length > 0) {
+        setUserPoints(response.data[0].pontos);
+      }
+    } catch (error) {
+      console.error("Error fetching user points:", error);
+    }
+  };
+
+  const fetchBenefits = async () => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/beneficio`, {
+        headers: { "access-token": token }
+      });
+      
+      // Filter benefits to only show those with quantity > 0
+      const availableBenefits = response.data.filter(benefit => benefit.quantidade > 0);
+      setBenefits(availableBenefits);
+    } catch (error) {
+      console.error("Error fetching benefits:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchUserPoints();
+      await fetchBenefits();
+    };
+    
+    loadData();
+  }, []);
+
   const handleRedeemBenefit = (benefit) => {
-    if (userPoints >= benefit.points) {
+    if (userPoints >= benefit.pontos) {
       setSelectedBenefit(benefit);
       setIsError(false);
       setAlertVisible(true);
     } else {
-      setSelectedBenefit({ title: "Pontos Insuficientes", description: "Você não tem pontos suficientes para este benefício." });
+      setSelectedBenefit({ 
+        nome: "Pontos Insuficientes", 
+        endereco: "Você não tem pontos suficientes para este benefício." 
+      });
       setIsError(true);
       setAlertVisible(true);
     }
   };
 
-  const confirmRedeem = () => {
-    if (selectedBenefit && userPoints >= selectedBenefit.points) {
-      setUserPoints(userPoints - selectedBenefit.points);
+  const confirmRedeem = async () => {
+    // If it's just an informational alert (error or success), simply close it
+    if (isError || (selectedBenefit && selectedBenefit.nome === "Resgate Concluído")) {
+      setAlertVisible(false);
+      return;
     }
-    setAlertVisible(false);
+
+    try {
+      setLoading(true);
+      const token = await getToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      // 1. Update user points (subtract benefit points)
+      const newPoints = userPoints - selectedBenefit.pontos;
+      await axios.put(
+        `${API_URL}/usuario/pontos`,
+        { pontos: newPoints },
+        { headers: { "access-token": token } }
+      );
+
+      // 2. Update benefit quantity (decrement by 1)
+      const newQuantity = selectedBenefit.quantidade - 1;
+      await axios.put(
+        `${API_URL}/beneficio/resgate`,
+        { 
+          _id: selectedBenefit._id,
+          quantidade: newQuantity 
+        },
+        { headers: { "access-token": token } }
+      );
+
+      // 3. Update local state
+      setUserPoints(newPoints);
+      
+      // 4. Refresh benefits list
+      await fetchBenefits();
+      
+      // 5. Close the current alert
+      setAlertVisible(false);
+      
+      // 6. Show success message after a short delay
+      setTimeout(() => {
+        setSelectedBenefit({
+          nome: "Resgate Concluído",
+          endereco: `Você resgatou: ${selectedBenefit.nome} com sucesso!`
+        });
+        setIsError(false);
+        setAlertVisible(true);
+      }, 300);
+    } catch (error) {
+      console.error("Error redeeming benefit:", error);
+      setSelectedBenefit({
+        nome: "Erro no Resgate",
+        endereco: "Ocorreu um erro ao resgatar o benefício. Tente novamente mais tarde."
+      });
+      setIsError(true);
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Texto personalizado para o alerta
   const getAlertMessage = () => {
     if (isError) {
-      return selectedBenefit?.description;
+      return selectedBenefit?.endereco;
     }
-    return `Deseja resgatar:  ${selectedBenefit?.title}? Serão utilizados ${selectedBenefit?.points} pontos.`;
+    if (selectedBenefit?.nome === "Resgate Concluído") {
+      return selectedBenefit?.endereco;
+    }
+    return `Deseja resgatar: ${selectedBenefit?.nome}? Serão utilizados ${selectedBenefit?.pontos} pontos.`;
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={{ marginTop: 10, color: theme.colors.text.primary }}>Carregando...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>      
@@ -59,38 +187,47 @@ const BenefitsScreen = () => {
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollViewContent, { marginTop: 10 }]} showsVerticalScrollIndicator={false}>
-        {benefitsData.map((benefit) => (
-          <TouchableOpacity
-            key={benefit.id}
-            style={[styles.benefitCard, { backgroundColor: theme.colors.surface }]}
-            onPress={() => handleRedeemBenefit(benefit)}
-          >
-            <View style={styles.benefitDetails}>
-              <Text style={[styles.benefitTitle, { color: theme.colors.text.primary, fontSize: fontSize.md }]}>{benefit.title}</Text>
-              <Text style={[styles.benefitDescription, { color: theme.colors.text.secondary, fontSize: fontSize.sm }]}>{benefit.description}</Text>
-              <View style={styles.pointsContainer}>
-                <Ticket color={theme.colors.info} size={20} />
-                <Text style={[styles.benefitPoints, { color: theme.colors.info, fontWeight: "bold", fontSize: fontSize.sm }]}>{benefit.points} pontos</Text>
-              </View>
-            </View>
+        {benefits.length > 0 ? (
+          benefits.map((benefit) => (
             <TouchableOpacity
-              style={[styles.redeemButton, { backgroundColor: theme.colors.primary }]}
+              key={benefit._id}
+              style={[styles.benefitCard, { backgroundColor: theme.colors.surface }]}
               onPress={() => handleRedeemBenefit(benefit)}
             >
-              <Text style={[styles.redeemButtonText, { color: theme.colors.text.inverse, fontWeight: "bold", fontSize: fontSize.sm }]}>Resgatar</Text>
+              <View style={styles.benefitDetails}>
+                <Text style={[styles.benefitTitle, { color: theme.colors.text.primary, fontSize: fontSize.md }]}>{benefit.nome}</Text>
+                <Text style={[styles.benefitDescription, { color: theme.colors.text.secondary, fontSize: fontSize.sm }]}>{benefit.endereco}</Text>
+                <View style={styles.pointsContainer}>
+                  <Ticket color={theme.colors.info} size={20} />
+                  <Text style={[styles.benefitPoints, { color: theme.colors.info, fontWeight: "bold", fontSize: fontSize.sm }]}>{benefit.pontos} pontos</Text>
+                </View>
+                <Text style={[styles.quantity, { color: theme.colors.text.secondary, fontSize: fontSize.xs }]}>Disponíveis: {benefit.quantidade}</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.redeemButton, { backgroundColor: theme.colors.primary }]}
+                onPress={() => handleRedeemBenefit(benefit)}
+              >
+                <Text style={[styles.redeemButtonText, { color: theme.colors.text.inverse, fontWeight: "bold", fontSize: fontSize.sm }]}>Resgatar</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
+              Não há benefícios disponíveis no momento.
+            </Text>
+          </View>
+        )}
       </ScrollView>
       
       <CustomAlert
         visible={alertVisible}
         onClose={() => setAlertVisible(false)}
         onConfirm={confirmRedeem}
-        title={isError ? selectedBenefit?.title : "Confirmar Resgate"}
+        title={isError || selectedBenefit?.nome === "Resgate Concluído" ? selectedBenefit?.nome : "Confirmar Resgate"}
         message={getAlertMessage()}
-        confirmText={isError ? "Ok" : "Resgatar"}
-        cancelText={isError ? "" : "Cancelar"}
+        confirmText={isError || selectedBenefit?.nome === "Resgate Concluído" ? "Ok" : "Resgatar"}
+        cancelText={isError || selectedBenefit?.nome === "Resgate Concluído" ? "" : "Cancelar"}
         confirmColor={isError ? theme.colors.info : theme.colors.primary}
       />
     </SafeAreaView>
@@ -109,8 +246,11 @@ const styles = StyleSheet.create({
   benefitDescription: { marginTop: 5 },
   pointsContainer: { flexDirection: "row", alignItems: "center", marginTop: 10 },
   benefitPoints: { marginLeft: 5, fontWeight: "bold" },
+  quantity: { marginTop: 5, fontStyle: "italic" },
   redeemButton: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 5 },
   redeemButtonText: { fontWeight: "bold" },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  emptyText: { textAlign: 'center', fontSize: 16 },
 });
 
 export default BenefitsScreen;
