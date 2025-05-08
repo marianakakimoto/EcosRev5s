@@ -1,14 +1,13 @@
 // src\screens\LoginScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { loginSchema } from '../utils/validationSchemas';
 import AuthForm from '../components/AuthForm';
-import axios from "axios"
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import PasswordModal from '../components/PasswordModal'; // Certifique-se da importação correta
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RegisterForm from '../components/RegisterForm';
 import ForgotPasswordForm from '../components/ForgotPasswordForm';
 
@@ -38,7 +37,7 @@ export default function LoginScreen() {
                 alert('Login com senha temporária realizado com sucesso.');
                 setLoginSuccessTemporaryPassword(true);
             } else {
-                if (redirect_url === 'menu.html') {
+                if (redirect_url === 'menu.html') { //menu.html == admin / menuUser.html == cliente
                     navigation.navigate('Main', { screen: 'HomeTab' });
                 } else {
                     navigation.navigate('Main', { screen: 'HomeTab' });
@@ -70,7 +69,7 @@ export default function LoginScreen() {
 
     const loginFields = [
         { name: 'email', label: 'Email' },
-        { name: 'password', label: 'Senha', secureTextEntry: true },
+        { name: 'password', label: 'Senha', secureTextEntry: !showPassword },
     ];
 
     return (
@@ -117,22 +116,43 @@ export default function LoginScreen() {
                 </Text>
             )}
 
-            {/* Modais */}
-            <PasswordModal
-                isVisible={isRegisterModalVisible}
-                onClose={() => setIsRegisterModalVisible(false)}
-                title="Cadastro"
+            {/* Modal para o formulário de Cadastro */}
+            <Modal
+                visible={isRegisterModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsRegisterModalVisible(false)}
             >
-                <RegisterForm onClose={() => setIsRegisterModalVisible(false)} />
-            </PasswordModal>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, {backgroundColor: theme.colors.background}]}>
+                        <View style={styles.modalHeader}>
+                            <TouchableOpacity onPress={() => setIsRegisterModalVisible(false)}>
+                                <Text style={{color: theme.colors.primary, fontSize: fontSize.md}}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <RegisterForm onClose={() => setIsRegisterModalVisible(false)} />
+                    </View>
+                </View>
+            </Modal>
 
-            <PasswordModal
-                isVisible={isForgotPasswordModalVisible}
-                onClose={() => setIsForgotPasswordModalVisible(false)}
-                title="Recuperar Senha"
+            {/* Modal para o formulário de Recuperação de Senha */}
+            <Modal
+                visible={isForgotPasswordModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsForgotPasswordModalVisible(false)}
             >
-                <ForgotPasswordForm onClose={() => setIsForgotPasswordModalVisible(false)} />
-            </PasswordModal>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, {backgroundColor: theme.colors.background}]}>
+                        <View style={styles.modalHeader}>
+                            <TouchableOpacity onPress={() => setIsForgotPasswordModalVisible(false)}>
+                                <Text style={{color: theme.colors.primary, fontSize: fontSize.md}}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <ForgotPasswordForm onClose={() => setIsForgotPasswordModalVisible(false)} />
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -167,4 +187,28 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     forgotPasswordText: {},
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '90%',
+        borderRadius: 10,
+        padding: 20,
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    modalTitle: {
+        fontWeight: 'bold',
+    }
 });
