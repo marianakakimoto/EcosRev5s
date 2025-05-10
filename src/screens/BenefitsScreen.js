@@ -7,6 +7,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomAlert from "../components/CustomAlert";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 
 const BenefitsScreen = () => {
   const [userPoints, setUserPoints] = useState(0);
@@ -17,9 +20,16 @@ const BenefitsScreen = () => {
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const { fontSize } = useFontSettings();
+  const route = useRoute();
+  useEffect(() => {
+    if (route.params?.refresh) {
+      fetchUserPoints();
+    }
+  }, [route.params?.refresh]);
+
 
   // API base URL
-  const API_URL = "http://localhost:3000/api";
+  const API_URL = "http://192.168.1.68:3000/api";
 
   const getToken = async () => {
     try {
@@ -39,7 +49,7 @@ const BenefitsScreen = () => {
       const response = await axios.get(`${API_URL}/usuario/pontos`, {
         headers: { "access-token": token }
       });
-      
+
       if (response.data && response.data.length > 0) {
         setUserPoints(response.data[0].pontos);
       }
@@ -56,7 +66,7 @@ const BenefitsScreen = () => {
       const response = await axios.get(`${API_URL}/beneficio`, {
         headers: { "access-token": token }
       });
-      
+
       // Filter benefits to only show those with quantity > 0
       const availableBenefits = response.data.filter(benefit => benefit.quantidade > 0);
       setBenefits(availableBenefits);
@@ -67,14 +77,16 @@ const BenefitsScreen = () => {
     }
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchUserPoints();
-      await fetchBenefits();
-    };
-    
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        await fetchUserPoints();
+        await fetchBenefits();
+      };
+      loadData();
+    }, [])
+  );
+
 
   const handleRedeemBenefit = (benefit) => {
     if (userPoints >= benefit.pontos) {
@@ -82,9 +94,9 @@ const BenefitsScreen = () => {
       setIsError(false);
       setAlertVisible(true);
     } else {
-      setSelectedBenefit({ 
-        nome: "Pontos Insuficientes", 
-        endereco: "Você não tem pontos suficientes para este benefício." 
+      setSelectedBenefit({
+        nome: "Pontos Insuficientes",
+        endereco: "Você não tem pontos suficientes para este benefício."
       });
       setIsError(true);
       setAlertVisible(true);
@@ -118,22 +130,22 @@ const BenefitsScreen = () => {
       const newQuantity = selectedBenefit.quantidade - 1;
       await axios.put(
         `${API_URL}/beneficio/resgate`,
-        { 
+        {
           _id: selectedBenefit._id,
-          quantidade: newQuantity 
+          quantidade: newQuantity
         },
         { headers: { "access-token": token } }
       );
 
       // 3. Update local state
       setUserPoints(newPoints);
-      
+
       // 4. Refresh benefits list
       await fetchBenefits();
-      
+
       // 5. Close the current alert
       setAlertVisible(false);
-      
+
       // 6. Show success message after a short delay
       setTimeout(() => {
         setSelectedBenefit({
@@ -177,7 +189,7 @@ const BenefitsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>      
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={[styles.headerContainer, { backgroundColor: theme.colors.surface }]}>
         <View style={styles.pointsHeader}>
           <Gift color={theme.colors.primary} size={24} />
@@ -219,7 +231,7 @@ const BenefitsScreen = () => {
           </View>
         )}
       </ScrollView>
-      
+
       <CustomAlert
         visible={alertVisible}
         onClose={() => setAlertVisible(false)}
