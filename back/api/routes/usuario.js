@@ -436,4 +436,149 @@ router.put("/senha", auth, [
 });
 
 
+// Route to request password reset
+router.post("/forgot-password", [
+  check("email")
+    .not()
+    .isEmpty()
+    .trim()
+    .withMessage("É obrigatório informar o email")
+    .isEmail()
+    .withMessage("Informe um email válido")
+], async (req, res) => {
+  /*
+    #swagger.tags = ['Usuário']
+    #swagger.summary = 'POST para solicitação de recuperação de senha'
+    #swagger.description = 'Função que envia uma senha temporária para o email do usuário'
+  */
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email } = req.body;
+
+  try {
+    // Check if email exists
+    const usuario = await db.collection(nomeCollection).findOne({ email });
+    
+    if (!usuario) {
+      return res.status(404).json({
+        errors: [{
+          value: email,
+          msg: `O email ${email} não está cadastrado no sistema.`,
+          param: "email"
+        }]
+      });
+    }
+
+    // Generate a random temporary password
+    const tempPassword = Math.random().toString(36).slice(-8);
+    
+    // Hash the temporary password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+    
+    // Update the user's password in the database
+    await db.collection(nomeCollection).updateOne(
+      { _id: usuario._id },
+      { $set: { 
+        senha: hashedPassword,
+        resetPasswordToken: true,  // Flag to indicate this is a temporary password
+        resetPasswordExpires: new Date(Date.now() + 3600000) // 1 hour from now
+      }}
+    );
+
+    // In a real application, you would send an email with nodemailer
+    // For now, we'll just return the temporary password in the response
+    // NOTE: In production, never return the password in the response!
+    
+    // Simulating email sending success
+    res.status(200).json({ 
+      message: "Uma senha temporária foi enviada para o seu email." 
+      // For development only, remove in production:
+      // tempPassword: tempPassword 
+    });
+    
+    // Log the temp password to console for development
+    console.log(`Temporary password for ${email}: ${tempPassword}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ 
+      errors: [{
+        msg: "Erro ao processar a recuperação de senha",
+        error: err.message
+      }]
+    });
+  }
+});
+
+// Route for user to reset password after logging in with temporary password
+router.post("/reset-password", auth, [
+  check("novaSenha")
+    .not()
+    .isEmpty()
+    .trim()
+    .withMessage("A nova senha é obrigatória")
+    .isLength({ min: 6 })
+    .withMessage("A nova senha deve ter no mínimo 6 caracteres")
+    .isStrongPassword({
+      minLength: 6,
+      minLowercase: 1,
+      minUppercase: 1,
+      minSymbols: 1,
+      minNumbers: 1,
+    })
+    .withMessage("A senha não é segura. Informe no mínimo 1 caractere maiúsculo, 1 minúsculo, 1 número e 1 caractere especial")
+], async (req, res) => {
+  /*
+    #swagger.tags = ['Usuário']
+    #swagger.summary = 'POST para alterar senha após recuperação'
+    #swagger.description = 'Função para definir nova senha após login com senha temporária'
+    #swagger.security = [{
+      "apiKeyAuth": []
+    }]
+  */
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { novaSenha } = req.body;
+  const userId = req.usuario.id;
+
+  try {
+    // Get user to check if this is a reset password flow
+    const usuario = await db.collection(nomeCollection).findOne({ _id: new ObjectId(userId) });
+    
+    if (!usuario) {
+      return res.status(404).json({ msg: "Usuário não encontrado" });
+    }
+    
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(novaSenha, salt);
+    
+    // Update the user's password and remove reset flags
+    await db.collection(nomeCollection).updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { senha: hashedPassword },
+        $unset: { resetPasswordToken: "", resetPasswordExpires: "" }
+      }
+    );
+    
+    res.status(200).json({ msg: "Senha alterada com sucesso" });
+    
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ 
+      msg: "Erro ao redefinir a senha", 
+      error: err.message 
+    });
+  }
+});
+
+
 export default router;

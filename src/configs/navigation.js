@@ -1,10 +1,11 @@
+// Modificação para MainNavigation.js
 import React from "react";
 import { SafeAreaView, View, StyleSheet } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { useAuth } from "../contexts/AuthContext"; // ✅ Importando o contexto de autenticação
-import { DrawerItemList } from "@react-navigation/drawer"; // ✅ Importando DrawerItemList
+import { useAuth } from "../contexts/AuthContext";
+import { DrawerItemList } from "@react-navigation/drawer";
 
 import HomeScreen from "../screens/HomeScreen";
 import BeneficiosScreen from "../screens/BenefitsScreen";
@@ -14,6 +15,7 @@ import PerfilScreen from "../screens/ProfileScreen";
 import ConfigScreen from "../screens/ConfigScreen";
 import QRCodeScannerScreen from "../screens/QRCodeScannerScreen";
 import LoginScreen from "../screens/LoginScreen";
+import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import BottomNavigation from "../components/BottomNavigation";
 import LogoutButton from "../components/LogoutButton";
 import Header from "../components/header";
@@ -31,6 +33,7 @@ export function TabScreens() {
       <Tab.Screen name="HistoricoTab" component={HistoricoScreen} options={{ title: "Histórico" }} />
       <Tab.Screen name="SobreTab" component={SobreScreen} options={{ title: "Sobre" }} />
       <Tab.Screen name="PerfilTab" component={PerfilScreen} options={{ title: "Perfil" }} />
+      <Tab.Screen name="ResetTab" component={ResetPasswordScreen} options={{ title: "Reset" }} />
     </Tab.Navigator>
   );
 }
@@ -38,7 +41,20 @@ export function TabScreens() {
 export function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{
+          headerShown: false,
+          // Prevent going back to login
+          gestureEnabled: false
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -49,7 +65,7 @@ export function AppStack() {
       drawerContent={(props) => (
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.spacer} />
-          <DrawerItemList {...props} /> {/* ✅ Agora DrawerItemList é renderizado */}
+          <DrawerItemList {...props} />
           <LogoutButton />
         </SafeAreaView>
       )}
@@ -67,11 +83,28 @@ export function AppStack() {
   );
 }
 
-// Wrapper para renderizar a navegação dependendo do estado de autenticação
+// Modificamos o fluxo para ter um Stack Navigator de alto nível
 export function MainNavigation() {
-  const { isAuthenticated } = useAuth(); // ✅ Obtém o estado de autenticação
-
-  return isAuthenticated ? <AppStack /> : <AuthStack />;
+  const { isAuthenticated } = useAuth();
+  
+  // Usamos um Stack Navigator principal para poder ter acesso a todas as telas
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <>
+          <Stack.Screen name="AppStack" component={AppStack} />
+          {/* ResetPassword também precisa estar acessível quando autenticado */}
+          <Stack.Screen 
+            name="ResetPassword" 
+            component={ResetPasswordScreen} 
+            options={{ gestureEnabled: false }}
+          />
+        </>
+      ) : (
+        <Stack.Screen name="AuthStack" component={AuthStack} />
+      )}
+    </Stack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({

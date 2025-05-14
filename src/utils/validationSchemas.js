@@ -37,11 +37,24 @@ export const loginSchema = Yup.object().shape({
     .required('A Senha é obrigatória'),
 });
 
-// Formulário de recuperação de senha
 export const forgotPasswordSchema = Yup.object().shape({
-  email: noMaliciousContent('Email')
-    .email('Email inválido')
-    .required('O email é obrigatório'),
+  email: Yup.string()
+    .required('O email é obrigatório')
+    .email('Por favor, informe um email válido'),
+});
+
+// Schema corrigido para o formulário de resetar senha
+export const resetPasswordSchema = Yup.object().shape({
+  password: Yup.string()
+    .required('A senha é obrigatória')
+    .min(6, 'A senha deve ter pelo menos 6 caracteres')
+    .matches(/[a-z]/, 'A senha deve conter pelo menos uma letra minúscula')
+    .matches(/[A-Z]/, 'A senha deve conter pelo menos uma letra maiúscula')
+    .matches(/[0-9]/, 'A senha deve conter pelo menos um número')
+    .matches(/[!@#$%^&*_]/, 'A senha deve conter pelo menos um caractere especial'),
+  confirmPassword: Yup.string()
+    .required('Confirme sua senha')
+    .oneOf([Yup.ref('password'), null], 'As senhas não conferem'),
 });
 
 // Atualização de senha no perfil

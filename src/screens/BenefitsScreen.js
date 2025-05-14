@@ -29,7 +29,7 @@ const BenefitsScreen = () => {
 
 
   // API base URL
-  const API_URL = "http://192.168.1.68:3000/api";
+  const API_URL = "http://localhost:3000/api";
 
   const getToken = async () => {
     try {
