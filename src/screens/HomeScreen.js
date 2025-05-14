@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Snackbar } from "react-native-paper";
 import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Carousel from "../components/Carousel";
@@ -16,23 +15,6 @@ export default function HomeScreen() {
   const theme = useTheme();
   const { fontSize } = useFontSettings();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-
-  // Snackbar para feedback
-  const showSnackbar = () => {
-    setSnackbarVisible(true);
-  };
-
-  const hideSnackbar = () => {
-    setSnackbarVisible(false);
-  };
-
-  const navigateToLogin = () => {
-    // Exemplo: antes de navegar, mostra o snackbar
-    showSnackbar();
-    setTimeout(() => {
-      navigation.navigate("Login");
-    }, 1500);
-  };
 
   //Carousel de Imagens
   const carouselSlides = [
