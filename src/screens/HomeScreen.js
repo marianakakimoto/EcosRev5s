@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Carousel from "../components/Carousel";
@@ -17,10 +16,8 @@ export default function HomeScreen() {
   const { fontSize } = useFontSettings();
 
   const navigateToLogin = () => {
-    setTimeout(() => {
-      navigation.navigate("Login");
-    }, 1500);
-  };
+  navigation.navigate("Login");
+};
 
   //Carousel de Imagens
   const carouselSlides = [
@@ -127,6 +124,8 @@ export default function HomeScreen() {
               { backgroundColor: theme.colors.primary },
             ]}
             onPress={navigateToLogin}
+            activeOpacity={0.7}
+            accessibilityLabel="Botão Começar Agora. Pressione para ir para a tela de login."
           >
             <Text
               style={[
@@ -160,6 +159,7 @@ export default function HomeScreen() {
                 name="recycling"
                 size={60}
                 color="#fff"
+                accessibilityLabel="Ícone de reciclagem de eletrônicos"
               />
               <Text
                 style={[
@@ -183,7 +183,8 @@ export default function HomeScreen() {
             <View style={styles.serviceItem}>
               <Coins
                 size={60}
-                color="#fff"              
+                color="#fff"
+                accessibilityLabel="Ícone de acúmulo de pontos"
               />
               <Text
                 style={[
@@ -207,6 +208,7 @@ export default function HomeScreen() {
               <Gift
                 size={60}
                 color="#fff"
+                accessibilityLabel="Ícone de recompensas exclusivas"
               />
               <Text
                 style={[
@@ -229,13 +231,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Depoimentos (Novo estilo) */}
-        <View
-          style={[
-            styles.testimonialsContainer,
-            { backgroundColor: theme.colors.surface },
-          ]}
-        >
+        {/* Depoimentos */}
+        <View style={[styles.testimonialsContainer, { backgroundColor: theme.colors.surface }]}>
+          
           <Text
             style={[
               styles.sectionTitle,
@@ -247,7 +245,7 @@ export default function HomeScreen() {
           
           <View style={styles.testimonialsGrid}>
             {testimonials.map((item) => (
-              <View key={item.id} style={styles.testimonialCard}>
+              <View key={item.id} style={[styles.testimonialCard, { backgroundColor: theme.colors.surface }]}>
                 {/* Estrelas de avaliação */}
                 <View style={styles.ratingContainer}>
                   {[...Array(5)].map((_, index) => (
@@ -255,23 +253,43 @@ export default function HomeScreen() {
                       key={index}
                       size={24}
                       color="#FFE136"
-                      fill="#FFE136"
+                      fill={"#FFE136"}
+                      accessibilityLabel={`Estrela ${index + 1} de 5`}
                     />
                   ))}
                 </View>
                 
-                <Text style={styles.testimonialText}>
+                <Text
+                  style={[
+                    styles.testimonialText,
+                    { color: theme.colors.text.primary },
+                  ]}
+                >
                   {item.text}
                 </Text>
                 
                 <View style={styles.userInfoContainer}>
                   <View style={[styles.avatarContainer, { backgroundColor: item.avatarBgColor }]}>
                     <MaterialIcons name="person" size={32} color="#fff" />
-                </View>
+                  </View>
                   
                   <View style={styles.userDetailsContainer}>
-                    <Text style={styles.usernameText}>{item.username}</Text>
-                    <Text style={styles.userInfoText}>{item.userInfo}</Text>
+                    <Text
+                      style={[
+                        styles.usernameText,
+                        { color: theme.colors.text.primary },
+                      ]}
+                    >
+                      {item.username}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.userInfoText,
+                        { color: theme.colors.text.secondary },
+                      ]}
+                    >
+                      {item.userInfo}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -279,7 +297,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 }
 
