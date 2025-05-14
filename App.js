@@ -1,13 +1,13 @@
 // App.js
 import { useFonts, Poppins_400Regular } from '@expo-google-fonts/poppins';
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { FontSettingsProvider } from "./src/contexts/FontContext";
 import LoadingScreen from "./src/screens/LoadingScreen";
-import { AppStack, AuthStack } from "./src/configs/navigation";
+import { AppStack} from "./src/configs/navigation";
 import { Provider as PaperProvider } from 'react-native-paper';
-import { AuthProvider } from "./src/contexts/AuthContext"; // ✅ Importar aqui
+import { AuthProvider } from "./src/contexts/AuthContext";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ export default function App() {
 
   if (isLoading || !fontsLoaded) {
     return (
-      <AuthProvider> {/* ✅ Envolver também a tela de loading */}
+      <AuthProvider>
         <ThemeProvider>
           <FontSettingsProvider>
             <PaperProvider>
@@ -36,12 +36,12 @@ export default function App() {
   }
 
   return (
-    <AuthProvider> {/* ✅ Isso permite o uso do useAuth() em qualquer lugar */}
+    <AuthProvider>
       <ThemeProvider>
         <FontSettingsProvider>
           <PaperProvider>
             <NavigationContainer>
-              <AppStack /> {/* ou <AuthStack /> se usar isAuthenticated do contexto */}
+              <AppStack />
             </NavigationContainer>
           </PaperProvider>
         </FontSettingsProvider>

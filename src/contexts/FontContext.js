@@ -12,9 +12,33 @@ const defaultFont = "Poppins-Regular";
 //const availableFonts = ["Poppins-Regular", "Roboto", "OpenSans", "Lato-Regular"];
 
 const defaultFontSizes = {
-  small: { sm: 12, md: 14, lg: 16 },
-  medium: { sm: 14, md: 16, lg: 18 },
-  large: { sm: 16, md: 18, lg: 20 },
+  small: {
+    xs: 12,
+    sm: 12,
+    md: 14,
+    lg: 16,
+    xl: 18,
+    xxl: 20,
+    xxxl: 24,
+  },
+  medium: {
+    xs: 12,
+    sm: 14,
+    md: 16,
+    lg: 18,
+    xl: 20,
+    xxl: 24,
+    xxxl: 32,
+  },
+  large: {
+    xs: 14,
+    sm: 16,
+    md: 18,
+    lg: 20,
+    xl: 24,
+    xxl: 28,
+    xxxl: 36,
+  },
 };
 
 export const FontSettingsProvider = ({ children }) => {

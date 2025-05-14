@@ -3,7 +3,7 @@ import { useColorScheme } from 'react-native';
 
 const lightTheme = {
     colors: {
-      primary: '#22C55E',      // Verde principal
+      primary: '#14AE5C',      // Verde principal
       secondary: '#2ecc71',    // Verde secundário
       background: '#f4f4f4',   // Fundo principal (claro)
       surface: '#fefffa',      // Superfície (ex.: cartões ou contêineres)
@@ -29,31 +29,6 @@ const lightTheme = {
       lg: 24,
       xl: 32,
       xxl: 48,
-    },
-    typography: {
-      fontFamily: {
-        regular: 'System',
-        medium: 'System-Medium',
-        bold: 'System-Bold',
-      },
-      fontSize: {
-        xs: 12,
-        sm: 14,
-        md: 16,
-        lg: 18,
-        xl: 20,
-        xxl: 24,
-        xxxl: 32,
-      },
-      lineHeight: {
-        xs: 16,
-        sm: 20,
-        md: 24,
-        lg: 28,
-        xl: 32,
-        xxl: 36,
-        xxxl: 40,
-      },
     },
     borderRadius: {
       xs: 2,
@@ -138,31 +113,6 @@ const darkTheme = {
       lg: 24,
       xl: 32,
       xxl: 48,
-    },
-    typography: {
-      fontFamily: {
-        regular: 'System',
-        medium: 'System-Medium',
-        bold: 'System-Bold',
-      },
-      fontSize: {
-        xs: 12,
-        sm: 14,
-        md: 16,
-        lg: 18,
-        xl: 20,
-        xxl: 24,
-        xxxl: 32,
-      },
-      lineHeight: {
-        xs: 16,
-        sm: 20,
-        md: 24,
-        lg: 28,
-        xl: 32,
-        xxl: 36,
-        xxxl: 40,
-      },
     },
     borderRadius: {
       xs: 2,

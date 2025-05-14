@@ -18,7 +18,7 @@ import LoginScreen from "../screens/LoginScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import BottomNavigation from "../components/BottomNavigation";
 import LogoutButton from "../components/LogoutButton";
-import Header from "../components/header";
+import Header from "../components/AppHeader";
 import { House, ArrowRightLeft, History, UserCog, Info, QrCode, LogIn } from "lucide-react-native";
 
 const Drawer = createDrawerNavigator();
