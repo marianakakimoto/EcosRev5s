@@ -1,17 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Snackbar } from "react-native-paper";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Carousel from "../components/Carousel";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Coins, Gift, Star } from 'lucide-react-native';
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../contexts/ThemeContext";
 import { useFontSettings } from "../contexts/FontContext";
@@ -25,7 +18,6 @@ export default function HomeScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   // Snackbar para feedback
-
   const showSnackbar = () => {
     setSnackbarVisible(true);
   };
@@ -43,7 +35,6 @@ export default function HomeScreen() {
   };
 
   //Carousel de Imagens
-
   const carouselSlides = [
     {
       imageSrc: require("../../assets/imagem1.jpg"),
@@ -71,9 +62,39 @@ export default function HomeScreen() {
     },
   ];
 
+  // Dados dos depoimentos
+  const testimonials = [
+    {
+      id: 1,
+      username: "@carlossantos",
+      text: "Uma excelente iniciativa! Agora meus filhos entendem a importância de reciclar e ainda se divertem trocando pontos por prêmios.💚",
+      rating: 5,
+      avatarBgColor: "#25C36A",
+      userInfo: "Usuário do EcosRev há 2 anos."
+    },
+    {
+      id: 2,
+      username: "@anasouza",
+      text: "EcosRev é simplesmente incrível! Simplesmente adoro! O sistema de pontos é muito gratificante e o suporte ao cliente é fantástico.",
+      rating: 5,
+      avatarBgColor: "#F5B041",
+      userInfo: "Usuário do EcosRev há 1 ano."
+    },
+    {
+      id: 3,
+      username: "@ambientalbsg_mariasilva",
+      text: "O melhor app de reciclagem que já usei! Recomendo demais.",
+      rating: 5,
+      avatarBgColor: "#85C1E9",
+      userInfo: "Usuário do EcosRev há 6 meses."
+    }
+  ];
+
+  // Componente removido pois está sendo implementado inline
+
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.surface }]}
     >
       <StatusBar
         backgroundColor={theme.colors.primary}
@@ -136,13 +157,13 @@ export default function HomeScreen() {
         <View
           style={[
             styles.servicesContainer,
-            { backgroundColor: theme.colors.background },
+            { backgroundColor: theme.colors.primary },
           ]}
         >
           <Text
             style={[
               styles.sectionTitle,
-              { color: theme.colors.text.primary, fontSize: fontSize.lg },
+              { color: theme.colors.text.inverse, fontSize: fontSize.xxl },
             ]}
           >
             O que oferecemos
@@ -152,12 +173,12 @@ export default function HomeScreen() {
               <MaterialIcons
                 name="recycling"
                 size={60}
-                color={theme.colors.primary}
+                color="#fff"
               />
               <Text
                 style={[
                   styles.serviceTitle,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Reciclagem de Eletrônicos
@@ -165,7 +186,7 @@ export default function HomeScreen() {
               <Text
                 style={[
                   styles.serviceText,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Recicle seus aparelhos eletrônicos de forma segura e
@@ -174,15 +195,14 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.serviceItem}>
-              <MaterialIcons
-                name="monetization-on"
+              <Coins
                 size={60}
-                color={theme.colors.primary}
+                color="#fff"              
               />
               <Text
                 style={[
                   styles.serviceTitle,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Acúmulo de Pontos
@@ -190,7 +210,7 @@ export default function HomeScreen() {
               <Text
                 style={[
                   styles.serviceText,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Ganhe pontos a cada item reciclado e troque por prêmios.
@@ -198,15 +218,14 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.serviceItem}>
-              <MaterialIcons
-                name="card-giftcard"
+              <Gift
                 size={60}
-                color={theme.colors.primary}
+                color="#fff"
               />
               <Text
                 style={[
                   styles.serviceTitle,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Recompensas Exclusivas
@@ -214,7 +233,7 @@ export default function HomeScreen() {
               <Text
                 style={[
                   styles.serviceText,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
+                  { color: theme.colors.text.inverse, fontSize: fontSize.md },
                 ]}
               >
                 Troque seus pontos por descontos, produtos, serviços e muito
@@ -224,7 +243,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Testemunhos */}
+        {/* Depoimentos (Novo estilo) */}
         <View
           style={[
             styles.testimonialsContainer,
@@ -234,119 +253,46 @@ export default function HomeScreen() {
           <Text
             style={[
               styles.sectionTitle,
-              { color: theme.colors.text.primary, fontSize: fontSize.lg },
+              { color: theme.colors.primary, fontSize: fontSize.lg, fontWeight: "bold" },
             ]}
           >
             Depoimentos
           </Text>
+          
           <View style={styles.testimonialsGrid}>
-            <View
-              style={[
-                styles.testimonialItem,
-                { backgroundColor: theme.colors.background },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.testimonialText,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
-                ]}
-              >
-                "O EcosRev facilitou a reciclagem de eletrônicos na minha casa.
-                Além de ajudar o meio ambiente, ainda ganho recompensas!"
-              </Text>
-              <Text
-                style={[
-                  styles.testimonialAuthor,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
-                ]}
-              >
-                — Maria Silva
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.testimonialItem,
-                { backgroundColor: theme.colors.background },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.testimonialText,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
-                ]}
-              >
-                "Uma excelente iniciativa! Agora meus filhos entendem a
-                importância de reciclar e ainda se divertem trocando pontos por
-                prêmios."
-              </Text>
-              <Text
-                style={[
-                  styles.testimonialAuthor,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
-                ]}
-              >
-                — Carlos Santos
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.testimonialItem,
-                { backgroundColor: theme.colors.background },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.testimonialText,
-                  { color: theme.colors.text.primary, fontSize: fontSize.md },
-                ]}
-              >
-                "Simplesmente adoro! O sistema de pontos é muito gratificante e
-                o suporte ao cliente é fantástico."
-              </Text>
-              <Text
-                style={[
-                  styles.testimonialAuthor,
-                  { color: theme.colors.text.secondary, fontSize: fontSize.sm },
-                ]}
-              >
-                — Ana Souza
-              </Text>
-            </View>
+            {testimonials.map((item) => (
+              <View key={item.id} style={styles.testimonialCard}>
+                {/* Estrelas de avaliação */}
+                <View style={styles.ratingContainer}>
+                  {[...Array(5)].map((_, index) => (
+                    <Star
+                      key={index}
+                      size={24}
+                      color="#FFE136"
+                      fill="#FFE136"
+                    />
+                  ))}
+                </View>
+                
+                <Text style={styles.testimonialText}>
+                  {item.text}
+                </Text>
+                
+                <View style={styles.userInfoContainer}>
+                  <View style={[styles.avatarContainer, { backgroundColor: item.avatarBgColor }]}>
+                    <MaterialIcons name="person" size={32} color="#fff" />
+                </View>
+                  
+                  <View style={styles.userDetailsContainer}>
+                    <Text style={styles.usernameText}>{item.username}</Text>
+                    <Text style={styles.userInfoText}>{item.userInfo}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
-
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={hideSnackbar}
-        duration={2000}
-        style={{
-          backgroundColor: theme.colors.surface,
-          borderWidth: 1,
-          borderColor: theme.colors.primary,
-          borderRadius: theme.borderRadius.md,
-          paddingHorizontal: theme.spacing.md,
-          marginHorizontal: theme.spacing.md,
-        }}
-        theme={{
-          colors: {
-            surface: theme.colors.surface,
-            onSurface: theme.colors.text.primary, // Cor do texto
-            accent: theme.colors.primary, // Cor do botão (Fechar)
-          },
-        }}
-        action={{
-          label: "Fechar",
-          onPress: hideSnackbar,
-        }}
-      >
-        <Text style={{ color: theme.colors.text.primary }}>
-          Redirecionando para login...
-        </Text>
-      </Snackbar>
     </SafeAreaView>
   );
 }
@@ -404,7 +350,7 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontWeight: "bold",
     marginTop: 10,
-    marginBottom: 5,
+    marginBottom: 10,
   },
   serviceText: {
     textAlign: "center",
@@ -413,11 +359,12 @@ const styles = StyleSheet.create({
   },
   testimonialsGrid: {
     width: "100%",
+    alignItems: "center",
   },
-  testimonialItem: {
-    backgroundColor: "#ffffff",
-    borderRadius: 8,
-    padding: 15,
+  testimonialCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: {
@@ -425,17 +372,52 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    shadowRadius: 5,
     elevation: 5,
+    width: "90%",
+    maxWidth: 450,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
   },
   testimonialText: {
-    fontStyle: "italic",
-    marginBottom: 10,
+    fontSize: 16,
+    marginBottom: 15,
     lineHeight: 22,
   },
-  testimonialAuthor: {
-    textAlign: "right",
+  userInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 5,
+  },
+  avatarContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+    overflow: "hidden",
+  },
+  avatarImagePlaceholder: {
+    width: 40,
+    height: 40,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    borderRadius: 20,
+  },
+  userDetailsContainer: {
+    flex: 1,
+  },
+  usernameText: {
+    fontSize: 16,
     fontWeight: "bold",
+    color: "#333",
+  },
+  userInfoText: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 2,
   },
   footer: {
     padding: 15,
