@@ -11,8 +11,16 @@ import { useFontSettings } from "../contexts/FontContext";
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
+  
   const theme = useTheme();
   const { fontSize } = useFontSettings();
+
+  const navigateToLogin = () => {
+    setTimeout(() => {
+      navigation.navigate("Login");
+    }, 1500);
+  };
 
   //Carousel de Imagens
   const carouselSlides = [
@@ -69,8 +77,6 @@ export default function HomeScreen() {
       userInfo: "Usuário do EcosRev há 6 meses."
     }
   ];
-
-  // Componente removido pois está sendo implementado inline
 
   return (
     <SafeAreaView
