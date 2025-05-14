@@ -11,10 +11,8 @@ import { useFontSettings } from "../contexts/FontContext";
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
   const theme = useTheme();
   const { fontSize } = useFontSettings();
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   //Carousel de Imagens
   const carouselSlides = [

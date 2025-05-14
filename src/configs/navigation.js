@@ -3,8 +3,8 @@ import { SafeAreaView, View, StyleSheet } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { useAuth } from "../contexts/AuthContext"; // ✅ Importando o contexto de autenticação
-import { DrawerItemList } from "@react-navigation/drawer"; // ✅ Importando DrawerItemList
+import { useAuth } from "../contexts/AuthContext";
+import { DrawerItemList } from "@react-navigation/drawer";
 
 import HomeScreen from "../screens/HomeScreen";
 import BeneficiosScreen from "../screens/BenefitsScreen";
@@ -16,7 +16,7 @@ import QRCodeScannerScreen from "../screens/QRCodeScannerScreen";
 import LoginScreen from "../screens/LoginScreen";
 import BottomNavigation from "../components/BottomNavigation";
 import LogoutButton from "../components/LogoutButton";
-import Header from "../components/header";
+import Header from "../components/AppHeader";
 import { House, ArrowRightLeft, History, UserCog, Info, QrCode, LogIn } from "lucide-react-native";
 
 const Drawer = createDrawerNavigator();
@@ -49,7 +49,7 @@ export function AppStack() {
       drawerContent={(props) => (
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.spacer} />
-          <DrawerItemList {...props} /> {/* ✅ Agora DrawerItemList é renderizado */}
+          <DrawerItemList {...props} /> 
           <LogoutButton />
         </SafeAreaView>
       )}
@@ -69,8 +69,7 @@ export function AppStack() {
 
 // Wrapper para renderizar a navegação dependendo do estado de autenticação
 export function MainNavigation() {
-  const { isAuthenticated } = useAuth(); // ✅ Obtém o estado de autenticação
-
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? <AppStack /> : <AuthStack />;
 }
 
