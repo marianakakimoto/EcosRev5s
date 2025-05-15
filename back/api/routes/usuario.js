@@ -4,6 +4,7 @@ import { check, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import auth from "../middleware/auth.js";
+import { sendPasswordResetEmail } from "../utils/emailService.js";
 
 const router = express.Router();
 const { db, ObjectId } = await connectToDatabase();
@@ -436,7 +437,7 @@ router.put("/senha", auth, [
 });
 
 
-// Route to request password reset
+// Substituir a rota de forgot-password existente com a versão adaptada
 router.post("/forgot-password", [
   check("email")
     .not()
@@ -449,7 +450,7 @@ router.post("/forgot-password", [
   /*
     #swagger.tags = ['Usuário']
     #swagger.summary = 'POST para solicitação de recuperação de senha'
-    #swagger.description = 'Função que envia uma senha temporária para o email do usuário'
+    #swagger.description = 'Função que envia uma senha temporária para o email do usuário usando Gmail'
   */
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -464,11 +465,8 @@ router.post("/forgot-password", [
     
     if (!usuario) {
       return res.status(404).json({
-        errors: [{
-          value: email,
-          msg: `O email ${email} não está cadastrado no sistema.`,
-          param: "email"
-        }]
+        success: false,
+        message: 'Email não encontrado no sistema.'
       });
     }
 
@@ -479,37 +477,49 @@ router.post("/forgot-password", [
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
     
+    // Calculate expiration (1 hour from now)
+    const expiracao = new Date();
+    expiracao.setHours(expiracao.getHours() + 1);
+    
     // Update the user's password in the database
     await db.collection(nomeCollection).updateOne(
       { _id: usuario._id },
       { $set: { 
         senha: hashedPassword,
         resetPasswordToken: true,  // Flag to indicate this is a temporary password
-        resetPasswordExpires: new Date(Date.now() + 3600000) // 1 hour from now
+        resetPasswordExpires: expiracao
       }}
     );
 
-    // In a real application, you would send an email with nodemailer
-    // For now, we'll just return the temporary password in the response
-    // NOTE: In production, never return the password in the response!
-    
-    // Simulating email sending success
-    res.status(200).json({ 
-      message: "Uma senha temporária foi enviada para o seu email." 
-      // For development only, remove in production:
-      // tempPassword: tempPassword 
-    });
-    
-    // Log the temp password to console for development
-    console.log(`Temporary password for ${email}: ${tempPassword}`);
-
+    try {
+      // Send the email with the temporary password
+      await sendPasswordResetEmail(email, tempPassword);
+      
+      // For development: continue showing the password in console
+      console.log(`Senha temporária gerada para ${email}: ${tempPassword}`);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Um email com instruções de recuperação de senha foi enviado para o seu endereço de email.'
+      });
+    } catch (emailError) {
+      // If there's an error sending the email, log the error but don't fail the request
+      console.error('Erro ao enviar email:', emailError);
+      
+      // Even with email error, return success (to avoid revealing internal issues)
+      console.log(`IMPORTANTE: Falha no envio do email. Senha temporária para ${email}: ${tempPassword}`);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Um email com instruções de recuperação de senha foi enviado para o seu endereço de email.'
+        // In production, you might want to add support contact here
+      });
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ 
-      errors: [{
-        msg: "Erro ao processar a recuperação de senha",
-        error: err.message
-      }]
+    console.error('Erro ao processar solicitação de recuperação de senha:', err);
+    return res.status(500).json({ 
+      success: false,
+      message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.'
     });
   }
 });

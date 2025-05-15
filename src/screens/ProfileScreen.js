@@ -7,6 +7,8 @@ import { User, CirclePower, Key } from 'lucide-react-native';
 import CustomAlert from '../components/CustomAlert';
 import PasswordModal from '../components/PasswordModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -33,9 +35,12 @@ export default function ProfileScreen() {
     showCancelButton: true,
   });
 
-  useEffect(() => {
+useFocusEffect(
+  React.useCallback(() => {
     fetchUserData();
-  }, []);
+  }, [])
+);
+
 
   const fetchUserData = async () => {
     setIsLoading(true);
@@ -60,6 +65,11 @@ export default function ProfileScreen() {
       });
     } catch (error) {
       console.error('Erro ao obter os dados do usuário:', error);
+      setUserData({
+        nome: "",
+        email: "",
+        profileImage: "",
+      });
       showAlert({
         title: 'Erro',
         message: 'Não foi possível carregar os dados do perfil.',
