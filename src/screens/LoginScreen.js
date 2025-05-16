@@ -1,7 +1,7 @@
 // Modificação para LoginScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
-import { useNavigation, CommonActions } from '@react-navigation/native'; // Adicionado CommonActions
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Image } from 'react-native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { loginSchema } from '../utils/validationSchemas';
@@ -98,162 +98,195 @@ export default function LoginScreen() {
         {
             name: 'email',
             label: 'Email',
+            placeholder: 'Insira seu email',
             autoCapitalize: 'none',
             keyboardType: 'email-address'
         },
         {
             name: 'password',
             label: 'Senha',
+            placeholder: 'Insira sua senha',
             secureTextEntry: !showPassword
         },
     ];
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text style={[styles.title, { color: theme.colors.primary, fontSize: fontSize.xl }]}>Login</Text>
-
-            {errorMessage && (
+        <View style={[styles.container, { backgroundColor: theme.colors.primary }]}>
+            <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                {errorMessage && (
                 <Text style={[styles.errorMessage, { color: theme.colors.error, fontSize: fontSize.sm }]}>
                     {errorMessage}
                 </Text>
-            )}
-
-            <AuthForm
-                initialValues={{ email: '', password: '' }}
-                validationSchema={loginSchema}
-                onSubmit={handleLogin}
-                fields={loginFields}
-                isPasswordVisible={showPassword}
-                togglePasswordVisibility={togglePasswordVisibility}
-            >
-                {({ handleSubmit }) => (
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: theme.colors.primary }]}
-                        onPress={handleSubmit}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator color={theme.colors.text.inverse} />
-                        ) : (
-                            <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
-                                Entrar
-                            </Text>
-                        )}
-                    </TouchableOpacity>
                 )}
-            </AuthForm>
+                <AuthForm
+                    initialValues={{ email: '', password: '' }}
+                    validationSchema={loginSchema}
+                    onSubmit={handleLogin}
+                    fields={loginFields}
+                    isPasswordVisible={showPassword}
+                    togglePasswordVisibility={togglePasswordVisibility}
+                >
+                    {({ handleSubmit }) => (
+                        <TouchableOpacity
+                            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+                            onPress={handleSubmit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color={theme.colors.text.inverse} />
+                            ) : (
+                                <Text style={[styles.buttonText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
+                                    Login
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    )}
+                </AuthForm>
 
-            <TouchableOpacity
-                onPress={() => setIsForgotPasswordModalVisible(true)}
-                style={styles.forgotPasswordLink}
-            >
-                <Text style={[styles.forgotPasswordText, { color: theme.colors.text.secondary, fontSize: fontSize.sm }]}>
-                    Esqueceu sua senha?
-                </Text>
-            </TouchableOpacity>
+                {/* Links agora alinhados à esquerda */}
+                <TouchableOpacity
+                    onPress={() => setIsForgotPasswordModalVisible(true)}
+                    style={styles.forgotPasswordLink}
+                >
+                    <Text style={[styles.forgotPasswordText, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}>
+                        Esqueceu a senha?
+                    </Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={() => setIsRegisterModalVisible(true)}
-                style={styles.link}
-            >
-                <Text style={[styles.linkText, { color: theme.colors.primary, fontSize: fontSize.sm }]}>
-                    Não tem uma conta? Cadastre-se
-                </Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => setIsRegisterModalVisible(true)}
+                    style={styles.link}
+                >
+                    <Text style={[styles.linkText, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}>
+                        Não possui uma conta?
+                    </Text>
+                </TouchableOpacity>
 
-            {/* Modal para o formulário de Cadastro */}
-            <Modal
-                visible={isRegisterModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setIsRegisterModalVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setIsRegisterModalVisible(false)}>
-                                <Text style={{ color: theme.colors.primary, fontSize: fontSize.md }}>✕</Text>
-                            </TouchableOpacity>
+                {/* Logo */}
+                <View style={styles.logoContainer}>
+                    <Image 
+                        source={require('../../assets/logo.png')} 
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>  
+
+                {/* Modal para o formulário de Cadastro */}
+                <Modal
+                    visible={isRegisterModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setIsRegisterModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
+                            <View style={styles.modalHeader}>
+                                <TouchableOpacity onPress={() => setIsRegisterModalVisible(false)}>
+                                    <Text style={{ color: theme.colors.primary, fontSize: fontSize.md }}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <RegisterForm onClose={() => setIsRegisterModalVisible(false)} />
                         </View>
-                        <RegisterForm onClose={() => setIsRegisterModalVisible(false)} />
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Modal para o formulário de Recuperação de Senha */}
-            <Modal
-                visible={isForgotPasswordModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setIsForgotPasswordModalVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setIsForgotPasswordModalVisible(false)}>
-                                <Text style={{ color: theme.colors.primary, fontSize: fontSize.md }}>✕</Text>
-                            </TouchableOpacity>
+                {/* Modal para o formulário de Recuperação de Senha */}
+                <Modal
+                    visible={isForgotPasswordModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setIsForgotPasswordModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
+                            <View style={styles.modalHeader}>
+                                <TouchableOpacity onPress={() => setIsForgotPasswordModalVisible(false)}>
+                                    <Text style={{ color: theme.colors.primary, fontSize: fontSize.md }}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <ForgotPasswordForm onClose={() => setIsForgotPasswordModalVisible(false)} />
                         </View>
-                        <ForgotPasswordForm onClose={() => setIsForgotPasswordModalVisible(false)} />
                     </View>
-                </View>
-            </Modal>
+                </Modal>
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-    },
-    title: {
-        fontWeight: 'bold',
-        marginBottom: 30,
-        textAlign: 'center',
-    },
-    button: {
-        padding: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    buttonText: {
-        fontWeight: 'bold',
-    },
-    link: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-    linkText: {},
-    forgotPasswordLink: {
-        marginTop: 15,
-        alignItems: 'flex-end',
-    },
-    forgotPasswordText: {},
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        width: '90%',
-        borderRadius: 10,
-        padding: 20,
-        maxHeight: '80%',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 15,
-        paddingBottom: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    modalTitle: {
-        fontWeight: 'bold',
-    }
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    borderRadius: 8,
+    padding: 24,
+    width: '90%',
+    maxWidth: 350, 
+  },
+  errorMessage: {
+    textAlign: 'center',
+    marginBottom: 10,
+    color: 'red',
+    fontSize: 14,
+  },
+  button: {
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    height: 40,
+  },
+  link: {
+    marginTop: 10,
+    alignItems: 'flex-start',
+  },
+  linkText: {
+    textDecorationLine: 'underline',
+  },
+  forgotPasswordLink: {
+    marginTop: 10,
+    alignItems: 'flex-start',
+  },
+  forgotPasswordText: {
+    textDecorationLine: 'underline'
+  },
+  logoContainer: {
+    marginTop: 40,
+    alignItems: 'center',
+  },
+  logo: {
+    height: 98,
+    width: 209,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 20,
+    width: '80%',
+    maxWidth: 300,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+  },
+  modalCloseButton: {
+    fontSize: 20,
+    color: '#555',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
 });

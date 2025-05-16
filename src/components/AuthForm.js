@@ -1,14 +1,14 @@
 // src/components/AuthForm.js
-import React from 'react';
-import { Text } from 'react-native';
-import { View } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Formik } from 'formik';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFontSettings } from '../contexts/FontContext';
 
 const AuthForm = ({ initialValues, validationSchema, onSubmit, fields, isPasswordVisible, togglePasswordVisibility, errorMessages, children }) => {
   const theme = useTheme();
+  const { fontSize } = useFontSettings();
 
   return (
     <Formik
@@ -19,22 +19,29 @@ const AuthForm = ({ initialValues, validationSchema, onSubmit, fields, isPasswor
       {({ handleChange, handleSubmit, values, errors, touched }) => (
         <View>
           {fields.map((field) => (
-            <View key={field.name}>
+            <View key={field.name} style={styles.inputContainer}>
+              <Text style={[styles.label, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}>
+                {field.label}
+              </Text>
               <TextInput
-                label={field.label}
                 value={values[field.name]}
                 onChangeText={handleChange(field.name)}
-                style={{ backgroundColor: theme.colors.surface, marginBottom: 8 }}
+                style={{ backgroundColor: theme.colors.surface, marginBottom: 8,height: 40 }}
                 mode="outlined"
                 activeOutlineColor={theme.colors.primary}
+                outlineColor={theme.colors.text.disabled}
                 secureTextEntry={field.secureTextEntry && !isPasswordVisible}
+                placeholder={field.placeholder}
+                placeholderTextColor={theme.colors.text.disabled}
+                autoCapitalize={field.autoCapitalize || "none"}
+                keyboardType={field.keyboardType || "default"}
                 right={
                   field.secureTextEntry ? (
                     <TextInput.Icon
                       icon={() =>
                         isPasswordVisible ?
-                          <EyeOff size={24} color={theme.colors.text.secondary} /> :
-                          <Eye size={24} color={theme.colors.text.secondary} />
+                          <EyeOff size={24} color={theme.colors.text.disabled} /> :
+                          <Eye size={24} color={theme.colors.text.disabled} />
                       }
                       onPress={togglePasswordVisibility}
                     />
@@ -55,11 +62,21 @@ const AuthForm = ({ initialValues, validationSchema, onSubmit, fields, isPasswor
             </View>
           ))}
           {typeof children === 'function' ? children({ handleSubmit }) : children}
-
         </View>
       )}
     </Formik>
   );
 };
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    marginBottom: 10,
+  },
+  label: {
+    marginBottom: 5,
+    fontWeight: '500',
+    textAlign: 'left',
+  }
+});
 
 export default AuthForm;
