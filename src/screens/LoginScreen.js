@@ -67,10 +67,6 @@ export default function LoginScreen() {
             } else {
                 // Fluxo normal de login - navegar para a tela apropriada com base no tipo de usuário
                 alert('Login realizado com sucesso!');
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Profile' }],
-                });
 
 
                 // Navegação para home

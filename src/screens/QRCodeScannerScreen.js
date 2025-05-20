@@ -113,7 +113,7 @@ const handleBarCodeScanned = async ({ data }) => {
       <CustomAlert
         visible={alertVisible}
         title="QR Code Escaneado"
-        message={`Dados: ${scannedData.pontos}`}
+        message={`Você recebeu ${scannedData.pontos} pontos!`}
         onClose={() => {
           setAlertVisible(false);
           setScanned(false);
