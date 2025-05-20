@@ -1,6 +1,7 @@
 // Modificação para LoginScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
@@ -118,6 +119,7 @@ export default function LoginScreen() {
                     {errorMessage}
                 </Text>
                 )}
+
                 <AuthForm
                     initialValues={{ email: '', password: '' }}
                     validationSchema={loginSchema}
@@ -169,7 +171,18 @@ export default function LoginScreen() {
                         style={styles.logo}
                         resizeMode="contain"
                     />
-                </View>  
+                </View>
+                
+                {/* Botão de voltar */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Main', { screen: 'HomeTab' })}
+                    style={styles.backHomeButton}
+                >
+                    <Ionicons name="arrow-back" size={18} color={theme.colors.text.primary} />
+                    <Text style={[styles.backHomeText, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}>
+                        Voltar para tela inicial
+                    </Text>
+                </TouchableOpacity>
 
                 {/* Modal para o formulário de Cadastro */}
                 <Modal
@@ -230,6 +243,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: 'red',
     fontSize: 14,
+  },
+  backHomeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  backHomeText: {
+    marginLeft: 6,
+    textDecorationLine: 'underline',
   },
   button: {
     paddingVertical: 8,
