@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Logo from '../../assets/logo.svg';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
@@ -166,11 +167,7 @@ export default function LoginScreen() {
 
                 {/* Logo */}
                 <View style={styles.logoContainer}>
-                    <Image 
-                        source={require('../../assets/logo.png')} 
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
+                    <Logo width={209} height={98} />
                 </View>
                 
                 {/* Botão de voltar */}
