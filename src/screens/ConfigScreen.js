@@ -1,6 +1,8 @@
 //src\screens\ConfigScreen.js
 import React, { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useFontSettings } from "../contexts/FontContext";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,6 +13,7 @@ const ConfigScreen = () => {
   const [currentThemeMode, setCurrentThemeMode] = useState(themeMode);
   const [currentFontPreference, setCurrentFontPreference] = useState(fontPreference);
   const appVersion = "0.1.0-beta";
+  const navigation = useNavigation();
 
   useEffect(() => {
     setCurrentThemeMode(themeMode);
@@ -110,6 +113,18 @@ const ConfigScreen = () => {
           <Text style={[styles.optionText, { color: colors.text.secondary, fontSize: fontSize.sm }]}>{appVersion}</Text>
         </View>
       </ScrollView>
+
+    {/* Botão de Voltar para Tela Inicial */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Main', { screen: 'HomeTab' })}
+            style={styles.backHomeButton}
+        >
+            <Ionicons name="arrow-back" size={18} color={colors.text.primary} />
+            <Text style={[styles.backHomeText, { color: colors.text.primary, fontSize: fontSize.sm }]}>
+                Voltar para tela inicial
+            </Text>
+        </TouchableOpacity>
+
     </SafeAreaView>
   );
 };
@@ -140,7 +155,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
   },
-  optionText: {},
+  backHomeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+
+  backHomeText: {
+    marginLeft: 6,
+    textDecorationLine: 'underline',
+  },
 });
 
 export default ConfigScreen;
