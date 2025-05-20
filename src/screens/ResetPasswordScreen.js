@@ -8,12 +8,10 @@ import { resetPasswordSchema } from '../utils/validationSchemas';
 import AuthForm from '../components/AuthForm';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// API configuration
-const API_BASE_URL = 'http://localhost:3000/api';
+import { API_URL } from "@env";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   timeout: 10000
 });
 

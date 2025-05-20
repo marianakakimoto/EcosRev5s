@@ -8,6 +8,7 @@ import CustomAlert from '../components/CustomAlert';
 import PasswordModal from '../components/PasswordModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_URL } from "@env";
 
 
 export default function ProfileScreen() {
@@ -45,7 +46,7 @@ useFocusEffect(
   const fetchUserData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/usuario/me', {
+      const response = await fetch(`${API_URL}/usuario/me`, {
         headers: {
           'Content-Type': 'application/json',
           'access-token': await AsyncStorage.getItem('token')
@@ -109,17 +110,24 @@ useFocusEffect(
     });
   };
 
-  const handleLogout = () => {
-    showAlert({
-      title: 'Confirmar Saída',
-      message: 'Tem certeza que deseja sair da conta?',
-      confirmText: 'Sair',
-      cancelText: 'Cancelar',
-      confirmColor: theme.colors.error,
-      onConfirm: () => navigation.navigate('Login'),
-      showCancelButton: true
-    });
-  };
+const handleLogout = () => {
+  showAlert({
+    title: 'Confirmar Saída',
+    message: 'Tem certeza que deseja sair da conta?',
+    confirmText: 'Sair',
+    cancelText: 'Cancelar',
+    confirmColor: theme.colors.error,
+    showCancelButton: true,
+    onConfirm: async () => {
+      try {
+        await AsyncStorage.removeItem('token');
+        navigation.navigate('Login');
+      } catch (error) {
+        console.error('Erro ao remover token:', error);
+      }
+    },
+  });
+};
 
   return (
     <ScrollView

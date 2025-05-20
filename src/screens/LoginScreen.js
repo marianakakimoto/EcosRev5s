@@ -12,13 +12,13 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RegisterForm from '../components/RegisterForm';
 import ForgotPasswordForm from '../components/ForgotPasswordForm';
+import { API_URL } from "@env";
+
 
 // Create a base URL constant for your API
-const API_BASE_URL = 'http://localhost:3000/api';
-
 // Create an axios instance with the base URL
 const api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: API_URL,
     timeout: 10000
 });
 

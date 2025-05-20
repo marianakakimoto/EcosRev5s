@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { registerSchema } from '../utils/validationSchemas';
 import AuthForm from './AuthForm';
+import { API_URL } from "@env";
 
 export default function RegisterForm({ onClose }) {
   const navigation = useNavigation();
@@ -15,7 +16,7 @@ export default function RegisterForm({ onClose }) {
 
   const handleRegister = async (values) => {
     try {
-      const response = await fetch("http://localhost:3000/api/usuario", {
+      const response = await fetch(`${API_URL}/usuario`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

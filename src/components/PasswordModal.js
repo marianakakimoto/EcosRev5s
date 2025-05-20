@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Modal, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext"; // Usando hook personalizado
+import { API_URL } from "@env";
 
 const PasswordModal = ({ isVisible, onClose, onSave, theme, fontSize }) => {
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -20,7 +21,7 @@ const PasswordModal = ({ isVisible, onClose, onSave, theme, fontSize }) => {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/api/usuario/senha",
+        `${API_URL}/usuario/senha`,
         {
           senhaAtual,
           novaSenha,

@@ -9,6 +9,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { API_URL } from "@env";
 
 
 const BenefitsScreen = () => {
@@ -26,10 +27,6 @@ const BenefitsScreen = () => {
       fetchUserPoints();
     }
   }, [route.params?.refresh]);
-
-
-  // API base URL
-  const API_URL = "http://localhost:3000/api";
 
   const getToken = async () => {
     try {
