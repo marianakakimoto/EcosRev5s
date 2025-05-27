@@ -1,11 +1,13 @@
 // Modificação para MainNavigation.js
 import React from "react";
-import { SafeAreaView, View, StyleSheet } from "react-native";
+import { SafeAreaView, View, StyleSheet, Text } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth } from "../contexts/AuthContext";
 import { DrawerItemList } from "@react-navigation/drawer";
+import { useTheme } from "../contexts/ThemeContext";
+import { useFontSettings } from "../contexts/FontContext";
 
 import HomeScreen from "../screens/HomeScreen";
 import BeneficiosScreen from "../screens/BenefitsScreen";
@@ -19,7 +21,7 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import BottomNavigation from "../components/BottomNavigation";
 import LogoutButton from "../components/LogoutButton";
 import Header from "../components/AppHeader";
-import { House, ArrowRightLeft, History, UserCog, Info, QrCode, LogIn } from "lucide-react-native";
+import { House, ArrowRightLeft, History, UserCog, Info, QrCode, LogIn, Settings } from "lucide-react-native";
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -60,25 +62,113 @@ export function AuthStack() {
 }
 
 export function AppStack() {
+  const theme = useTheme();
+  const { fontSize, fontFamily } = useFontSettings();
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => (
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={styles.spacer} />
+        <SafeAreaView style={[styles.drawerContainer, { backgroundColor: theme.colors.surface }]}>
+          <View style={[styles.drawerHeader, { backgroundColor: theme.colors.primary }]}>
+            <Text style={[styles.drawerTitle, { 
+              color: theme.colors.text.inverse, 
+              fontSize: fontSize.xl,
+              marginTop: 10,
+            }]}>
+              EcosRev
+            </Text>
+          </View>
+          <View style={[styles.drawerDivider, { borderBottomColor: theme.colors.border }]} />
           <DrawerItemList {...props} />
-          <LogoutButton />
+          <View style={styles.logoutContainer}>
+            <LogoutButton />
+          </View>
         </SafeAreaView>
       )}
-      screenOptions={{ header: () => <Header /> }}
+      screenOptions={{ 
+        headerShown: false,
+        drawerActiveTintColor: theme.colors.primary,
+        drawerInactiveTintColor: theme.colors.text.primary,
+        drawerActiveBackgroundColor: `${theme.colors.primary}20`, // 20% de opacidade
+        drawerInactiveBackgroundColor: 'transparent',
+        drawerLabelStyle: {
+          marginLeft: -5,
+          fontSize: fontSize.md,
+          fontWeight: '500',
+          fontFamily: fontFamily,
+        },
+        drawerStyle: {
+          backgroundColor: theme.colors.surface,
+          width: 280,
+          borderRightColor: theme.colors.border,
+          borderRightWidth: 1,
+        }
+      }}
     >
-      <Drawer.Screen name="Main" component={TabScreens} options={{ title: "Início", drawerIcon: () => <House size={24} /> }} />
-      <Drawer.Screen name="Perfil" component={TabScreens} options={{ drawerIcon: () => <UserCog size={24} /> }} />
-      <Drawer.Screen name="Login" component={LoginScreen} options={{ title: "Entrar", drawerIcon: () => <LogIn size={24} /> }} />
-      <Drawer.Screen name="Troca" component={TabScreens} options={{ drawerIcon: () => <ArrowRightLeft size={24} /> }} />
-      <Drawer.Screen name="QrCode" component={QRCodeScannerScreen} options={{ drawerIcon: () => <QrCode size={24} /> }} />
-      <Drawer.Screen name="Historico" component={TabScreens} options={{ drawerIcon: () => <History size={24} /> }} />
-      <Drawer.Screen name="Sobre" component={TabScreens} options={{ drawerIcon: () => <Info size={24} /> }} />
-      <Drawer.Screen name="Configurações" component={ConfigScreen} options={{ drawerIcon: () => <UserCog size={24} /> }} />
+      <Drawer.Screen 
+        name="Main" 
+        component={TabScreens} 
+        options={{ 
+          title: "Início", 
+          drawerIcon: ({size}) => <House color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Perfil" 
+        component={TabScreens} 
+        options={{ 
+          title: "Perfil",
+          drawerIcon: ({size}) => <UserCog color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Login" 
+        component={LoginScreen} 
+        options={{ 
+          title: "Entrar", 
+          drawerIcon: ({size}) => <LogIn color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Troca" 
+        component={TabScreens} 
+        options={{ 
+          title: "Troca",
+          drawerIcon: ({size}) => <ArrowRightLeft color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="QrCode" 
+        component={QRCodeScannerScreen} 
+        options={{ 
+          title: "QR Code",
+          drawerIcon: ({size}) => <QrCode color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Historico" 
+        component={TabScreens} 
+        options={{ 
+          title: "Histórico",
+          drawerIcon: ({size}) => <History color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Sobre" 
+        component={TabScreens} 
+        options={{ 
+          title: "Sobre",
+          drawerIcon: ({size}) => <Info color="#14AE5C" size={size} /> 
+        }} 
+      />
+      <Drawer.Screen 
+        name="Configurações" 
+        component={ConfigScreen} 
+        options={{ 
+          title: "Configurações",
+          drawerIcon: ({size}) => <Settings color="#14AE5C" size={size} /> 
+        }} 
+      />
     </Drawer.Navigator>
   );
 }
@@ -108,7 +198,28 @@ export function MainNavigation() {
 }
 
 const styles = StyleSheet.create({
-  spacer: {
-    height: 40,
+  drawerContainer: {
+    flex: 1,
+    paddingTop: 15, // Adicionado um pequeno padding para dar espaço ao topo
+  },
+  drawerHeader: {
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  drawerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 0,
+  },
+  drawerDivider: {
+    borderBottomWidth: 1,
+    marginBottom: 12,
+  },
+  logoutContainer: {
+    marginTop: 'auto',
+    marginBottom: 20,
+    paddingHorizontal: 16,
   },
 });
