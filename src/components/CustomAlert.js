@@ -6,7 +6,8 @@ import { useFontSettings } from "../contexts/FontContext";
 const CustomAlert = ({ 
   visible, 
   onClose, 
-  onConfirm, 
+  onConfirm,
+  onCancel,
   title, 
   message,
   cancelText = "Cancelar",
@@ -91,14 +92,13 @@ const CustomAlert = ({
             !showCancelButton && styles.singleButtonContainer
           ]}>
             {showCancelButton ? (
-              <>
-                <TouchableOpacity
+              <>                <TouchableOpacity
                   style={[
                     styles.button, 
                     styles.cancelButton,
                     { borderColor: buttonCancelColor }
                   ]}
-                  onPress={onClose}
+                  onPress={onCancel || onClose}
                   activeOpacity={0.7}
                 >
                   <Text 
