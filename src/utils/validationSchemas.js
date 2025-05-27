@@ -15,13 +15,17 @@ const noMaliciousContent = (label = 'Campo') =>
 // Formulário de registro
 export const registerSchema = Yup.object().shape({
   name: noMaliciousContent('Nome')
-    .min(2, 'Nome muito curto')
+    .min(3, 'Nome deve ter no mínimo 3 caracteres')
+    .max(100, 'Nome deve ter no máximo 100 caracteres')
+    .matches(/^[a-zA-ZÀ-ÿ\s]+$/, 'O nome deve conter apenas letras e espaços')
     .required('Nome é obrigatório'),
   email: noMaliciousContent('Email')
     .email('Email inválido')
+    .matches(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, 'O email não deve conter letras maiúsculas')
     .required('Email é obrigatório'),
   password: noMaliciousContent('Senha')
     .min(6, 'A senha deve ter no mínimo 6 caracteres')
+    .matches(/[a-z]/, 'A senha deve conter pelo menos uma letra minúscula')
     .matches(/[A-Z]/, 'A senha deve conter pelo menos uma letra maiúscula')
     .matches(/[0-9]/, 'A senha deve conter pelo menos um número')
     .matches(/[!@#$%^&*_]/, 'A senha deve conter pelo menos um caractere especial')
@@ -38,12 +42,13 @@ export const loginSchema = Yup.object().shape({
 });
 
 export const forgotPasswordSchema = Yup.object().shape({
-  email: Yup.string()
+  email: noMaliciousContent('Email')
     .required('O email é obrigatório')
-    .email('Por favor, informe um email válido'),
+    .email('Por favor, informe um email válido')
+    .matches(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, 'O email não deve conter letras maiúsculas'),
 });
 
-// Schema corrigido para o formulário de resetar senha
+// Schema para o formulário de resetar senha
 export const resetPasswordSchema = Yup.object().shape({
   password: Yup.string()
     .required('A senha é obrigatória')
@@ -63,6 +68,7 @@ export const passwordUpdateSchema = Yup.object().shape({
     .required('Senha atual é obrigatória'),
   newPassword: noMaliciousContent('Nova senha')
     .min(6, 'A nova senha deve ter no mínimo 6 caracteres')
+    .matches(/[a-z]/, 'A senha deve conter pelo menos uma letra minúscula', { excludeEmptyString: true })
     .matches(/[A-Z]/, 'A senha deve conter pelo menos uma letra maiúscula', { excludeEmptyString: true })
     .matches(/[0-9]/, 'A senha deve conter pelo menos um número', { excludeEmptyString: true })
     .matches(/[!@#$%^&*_]/, 'A senha deve conter pelo menos um caractere especial', { excludeEmptyString: true })
