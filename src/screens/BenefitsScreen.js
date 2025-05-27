@@ -101,7 +101,31 @@ const BenefitsScreen = () => {
   };
 
   const confirmRedeem = async () => {
+    console.log(selectedBenefit)
     // If it's just an informational alert (error or success), simply close it
+    await fetch("http://192.168.228.105:4000/hist/transacoes", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        _id: await AsyncStorage.getItem('user'),
+        pontos: selectedBenefit.pontos,
+        description: selectedBenefit.nome
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro na requisição: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Resposta:', data);
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+      });
     if (isError || (selectedBenefit && selectedBenefit.nome === "Resgate Concluído")) {
       setAlertVisible(false);
       return;
@@ -230,15 +254,32 @@ const BenefitsScreen = () => {
       </ScrollView>
 
       <CustomAlert
-        visible={alertVisible}
-        onClose={() => setAlertVisible(false)}
-        onConfirm={confirmRedeem}
-        title={isError || selectedBenefit?.nome === "Resgate Concluído" ? selectedBenefit?.nome : "Confirmar Resgate"}
-        message={getAlertMessage()}
-        confirmText={isError || selectedBenefit?.nome === "Resgate Concluído" ? "Ok" : "Resgatar"}
-        cancelText={isError || selectedBenefit?.nome === "Resgate Concluído" ? "" : "Cancelar"}
-        confirmColor={isError ? theme.colors.info : theme.colors.primary}
-      />
+  visible={alertVisible}
+  onClose={() => setAlertVisible(false)}
+  onConfirm={
+    isError || selectedBenefit?.nome === "Resgate Concluído"
+      ? () => setAlertVisible(false)
+      : confirmRedeem
+  }
+  title={
+    isError || selectedBenefit?.nome === "Resgate Concluído"
+      ? selectedBenefit?.nome
+      : "Confirmar Resgate"
+  }
+  message={getAlertMessage()}
+  confirmText={
+    isError || selectedBenefit?.nome === "Resgate Concluído"
+      ? "Ok"
+      : "Resgatar"
+  }
+  cancelText={
+    isError || selectedBenefit?.nome === "Resgate Concluído"
+      ? ""
+      : "Cancelar"
+  }
+  confirmColor={isError ? theme.colors.info : theme.colors.primary}
+/>
+
     </SafeAreaView>
   );
 };

@@ -39,7 +39,9 @@ function getBrazilDateTime() {
  */
 router.post('/hist/pontos', async (req, res) => {
   try {
-    const { id, idUser, points } = req.body;
+    const id = req.body.hash;
+    const idUser = req.body._id;
+    const points = req.body.pontos;
 
     if (!id || !idUser || !points) {
       return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
@@ -85,7 +87,9 @@ router.post('/hist/pontos', async (req, res) => {
  */
 router.post('/hist/transacoes', async (req, res) => {
   try {
-    const { idUser, description, points } = req.body;
+    const idUser = req.body._id;
+    const points = req.body.pontos;
+    const description = req.body.description
 
     if (!idUser || !description || !points) {
       return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
