@@ -79,7 +79,7 @@ export default function QRCodeScanner() {
       { headers: { "access-token": token } }
     );
 
-    await fetch("http://192.168.228.105:4000/hist/pontos", {
+    await fetch("http://localhost:4000/hist/pontos", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

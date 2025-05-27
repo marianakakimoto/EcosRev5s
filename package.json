@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "start:all": "concurrently \"npm --prefix back run dev\" \"cd back/api-hist && node src/server.js\" \"npx expo start\""
   },
   "dependencies": {
     "@expo-google-fonts/lato": "^0.3.0",
@@ -43,7 +44,8 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "concurrently": "^9.1.2"
   },
   "private": true
 }

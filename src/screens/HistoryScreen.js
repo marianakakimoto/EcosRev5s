@@ -1,28 +1,21 @@
 //src\screens\HistoryScreen.js
-import React from 'react';
-import { View, Text, SectionList, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, SectionList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { ArrowUp, ArrowDown } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const transactions = [
-  { id: '1', benefit: 'Ingresso para o Cinelópolis', points: -500, date: '15/01/2024' },
-  { id: '2', benefit: 'Voucher para MC Donalds', points: -1000, date: '15/11/2024' },
-  { id: '3', benefit: 'Ingresso Festa Junina Votorantim', points: 300, date: '22/05/2024' },
-  { id: '4', benefit: 'Cupom de Combustível Shell', points: -800, date: '01/03/2024' },
-  { id: '5', benefit: 'Voucher Restaurante Outback', points: -1200, date: '08/02/2025' },
-  { id: '6', benefit: 'Crédito de Pontos', points: 400, date: '28/02/2024' },
-  { id: '7', benefit: 'Entrada Parque Aquático Termas', points: -900, date: '19/01/2024' },
-  { id: '8', benefit: 'Desconto na Conta de Luz', points: 600, date: '01/04/2024' },
-  { id: '9', benefit: 'Cupom de Compra na Livraria Cultura', points: -300, date: '10/03/2024' },
-  { id: '10', benefit: 'Crédito de Pontos Promocionais', points: 500, date: '25/03/2024' }
-];
+// Você precisa definir sua URL base da API
+const API_BASE_URL = 'http://localhost:4000'; // Substitua pela sua URL
 
 const groupByMonth = (data) => {
   const grouped = {};
 
   data.forEach((item) => {
-    const [day, month, year] = item.date.split('/');
+    const dateStr = item.date.split(',')[0]; // Pega apenas a data, sem a hora
+    const [day, month, year] = dateStr.split('/');
     const key = `${month}/${year}`;
     if (!grouped[key]) {
       grouped[key] = [];
@@ -30,20 +23,86 @@ const groupByMonth = (data) => {
     grouped[key].push(item);
   });
 
-  return Object.keys(grouped).map((key) => ({
-    title: key,
-    total: grouped[key].reduce((acc, item) => acc + item.points, 0),
-    data: grouped[key],
-  }));
+  return Object.keys(grouped)
+    .sort((a, b) => {
+      const [monthA, yearA] = a.split('/').map(Number);
+      const [monthB, yearB] = b.split('/').map(Number);
+      
+      if (yearA !== yearB) return yearB - yearA;
+      return monthB - monthA;
+    })
+    .map((key) => ({
+      title: key,
+      total: grouped[key].reduce((acc, item) => {
+        // Para transações, considera como débito (negativo)
+        const pointsValue = item.tipo === 'transacao' ? -Math.abs(parseInt(item.points)) : parseInt(item.points);
+        return acc + pointsValue;
+      }, 0),
+      data: grouped[key].sort((a, b) => {
+        // Ordenar por data e hora completa (mais recente primeiro)
+        const parseDateTime = (dateTimeStr) => {
+          const [datePart, timePart] = dateTimeStr.split(', ');
+          const [day, month, year] = datePart.split('/');
+          const [hours, minutes, seconds] = timePart.split(':');
+          return new Date(year, month - 1, day, hours, minutes, seconds);
+        };
+        
+        const dateA = parseDateTime(a.date);
+        const dateB = parseDateTime(b.date);
+        return dateB - dateA; // Mais recente primeiro
+      }),
+    }));
 };
 
-const HistoryScreen = () => {
+const HistoryScreen = ({ route }) => {
   const theme = useTheme();
   const { fontSize } = useFontSettings();
-  const sections = groupByMonth(transactions);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Você pode receber o idUser via route params ou context
+  const { idUser } = route?.params || { idUser: 'default-user-id' };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  // Atualiza automaticamente quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, [])
+  );
+
+  const fetchHistory = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/hist/${await AsyncStorage.getItem("user")}`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao buscar histórico');
+      }
+      
+      const data = await response.json();
+      setHistory(data.history || []);
+    } catch (error) {
+      console.error('Erro ao buscar histórico:', error);
+      Alert.alert('Erro', 'Não foi possível carregar o histórico. Tente novamente.');
+      setHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sections = groupByMonth(history);
 
   const renderItem = ({ item }) => {
-    const isNegative = item.points < 0;
+    const isTransaction = item.tipo === 'transacao';
+    
+    // Para transações, os pontos são sempre negativos (débito)
+    // Para pontos, mantém o valor original (crédito)
+    const pointsValue = isTransaction ? -Math.abs(parseInt(item.points)) : parseInt(item.points);
+    const isNegative = pointsValue < 0;
 
     return (
       <View
@@ -55,36 +114,50 @@ const HistoryScreen = () => {
       >
         <View style={styles.transactionHeader}>
           <Text
-            style={[styles.benefitName, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+            style={[
+              styles.benefitName, 
+              { 
+                color: theme.colors.text.primary, 
+                fontSize: fontSize.md 
+              }
+            ]}
+            numberOfLines={2}
             testID={`transaction-benefit-${item.id}`}
           >
-            {item.benefit}
+            {isTransaction ? item.description : 'Crédito de Pontos'}
           </Text>
           <View style={styles.pointsContainer}>
             {isNegative ? (
-              <ArrowDown color={theme.colors.error} size={16} /> // Usando cores do tema
+              <ArrowDown color={theme.colors.error} size={16} />
             ) : (
-              <ArrowUp color={theme.colors.success} size={16} /> // Usando cores do tema
+              <ArrowUp color={theme.colors.success} size={16} />
             )}
             <Text
               style={[
                 styles.points,
-                { color: isNegative ? theme.colors.error : theme.colors.success, fontSize: fontSize.sm }
+                { 
+                  color: isNegative ? theme.colors.error : theme.colors.success, 
+                  fontSize: fontSize.md 
+                }
               ]}
               testID={`transaction-points-${item.id}`}
             >
-              {item.points > 0 ? '+' : ''}{item.points} pts
+              {pointsValue > 0 ? '+' : ''}{pointsValue} pts
             </Text>
           </View>
         </View>
         <View style={styles.transactionFooter}>
           <Text
-            style={[styles.date, { color: theme.colors.text.secondary, fontSize: fontSize.xs }]}
+            style={[
+              styles.date, 
+              { 
+                color: theme.colors.text.secondary, 
+                fontSize: fontSize.xs 
+              }
+            ]}
             testID={`transaction-date-${item.id}`}
           >
-            {item.date}
+            {item.date.split(',')[0]} {/* Remove a hora, mostra apenas a data */}
           </Text>
         </View>
       </View>
@@ -94,13 +167,22 @@ const HistoryScreen = () => {
   const renderSectionHeader = ({ section: { title, total } }) => {
     return (
       <View style={styles.sectionHeaderContainer}>
-        <Text style={[styles.sectionHeader, { color: theme.colors.text.primary, fontSize: fontSize.md }]}>
+        <Text style={[
+          styles.sectionHeader, 
+          { 
+            color: theme.colors.text.primary, 
+            fontSize: fontSize.md 
+          }
+        ]}>
           {title}
         </Text>
         <Text
           style={[
             styles.sectionTotal,
-            { color: total < 0 ? theme.colors.error : theme.colors.success, fontSize: fontSize.sm }
+            { 
+              color: total < 0 ? theme.colors.error : theme.colors.success, 
+              fontSize: fontSize.sm 
+            }
           ]}
         >
           Total: {total > 0 ? '+' : ''}{total} pts
@@ -109,11 +191,45 @@ const HistoryScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={[
+          styles.loadingText, 
+          { 
+            color: theme.colors.text.secondary, 
+            fontSize: fontSize.sm,
+            marginTop: 12
+          }
+        ]}>
+          Carregando histórico...
+        </Text>
+      </View>
+    );
+  }
+
+  if (history.length === 0) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <Text style={[
+          styles.emptyText, 
+          { 
+            color: theme.colors.text.secondary, 
+            fontSize: fontSize.md 
+          }
+        ]}>
+          Nenhum histórico encontrado
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <SectionList
         sections={sections}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `${item.tipo}-${item.id}`}
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContainer}
@@ -127,6 +243,10 @@ const HistoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
     paddingHorizontal: 16,
@@ -147,21 +267,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   transactionCard: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
+    padding: 16,
+    borderRadius: 0,
+    marginBottom: 0,
+    elevation: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   transactionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    alignItems: 'flex-start',
+    marginBottom: 8,
   },
   benefitName: {
-    fontWeight: '500',
+    fontWeight: '400',
     flex: 1,
-    marginRight: 8,
+    marginRight: 12,
+    lineHeight: 20,
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -169,14 +292,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   points: {
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   transactionFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   date: {
+    flex: 1,
+  },
+  loadingText: {
+    textAlign: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
   },
 });
 

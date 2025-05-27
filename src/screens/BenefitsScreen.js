@@ -103,7 +103,7 @@ const BenefitsScreen = () => {
   const confirmRedeem = async () => {
     console.log(selectedBenefit)
     // If it's just an informational alert (error or success), simply close it
-    await fetch("http://192.168.228.105:4000/hist/transacoes", {
+    await fetch("http://localhost:4000/hist/transacoes", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
