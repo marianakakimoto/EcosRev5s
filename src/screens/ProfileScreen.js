@@ -304,8 +304,8 @@ const confirmDeleteAccount = () => {
                 Alterar Senha
               </Text>
             </TouchableOpacity>
-          </View>
-        </View>        <TouchableOpacity
+          </View>        </View>
+        <TouchableOpacity
           style={[styles.logoutButton, { borderColor: theme.colors.error }]}
           onPress={handleLogout}
         >
@@ -314,15 +314,14 @@ const confirmDeleteAccount = () => {
             Logout
           </Text>
         </TouchableOpacity>
-
-        {/* Botão para apagar conta */}
+        
+        {/* Link apagar conta */}
         <TouchableOpacity
-          style={[styles.deleteAccountButton, { backgroundColor: theme.colors.error }]}
+          style={styles.deleteAccountLink}
           onPress={handleDeleteAccount}
         >
-          <Trash2 size={24} color={theme.colors.text.inverse} style={{ marginRight: 8 }} />
-          <Text style={[styles.deleteAccountText, { color: theme.colors.text.inverse, fontSize: fontSize.md }]}>
-            Apagar Minha Conta
+          <Text style={[styles.deleteAccountLinkText, { color: theme.colors.text.secondary, fontSize: fontSize.sm || fontSize.md - 2 }]}>
+            Apagar minha conta
           </Text>
         </TouchableOpacity>
       </View>
@@ -343,9 +342,8 @@ const confirmDeleteAccount = () => {
         theme={theme}
         fontSize={fontSize}
         showAlert={showAlert}
-      />
-
-      {/* CustomAlert Component */}      <CustomAlert
+      />      {/* CustomAlert Component */}
+      <CustomAlert
         visible={alertConfig.visible}
         title={alertConfig.title}
         message={alertConfig.message}
@@ -445,16 +443,15 @@ const styles = StyleSheet.create({
   },  logoutText: {
     marginLeft: 10,
     fontWeight: 'bold',
-  },
-  deleteAccountButton: {
-    flexDirection: 'row',
+  },  deleteAccountLink: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 15,
+    marginTop: 20,
+    marginBottom: 10,
   },
-  deleteAccountText: {
-    fontWeight: 'bold',
+  deleteAccountLinkText: {
+    textDecorationLine: 'underline',
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
