@@ -1,4 +1,4 @@
-// src/components/AuthForm.js
+﻿// src/components/AuthForm.js
 import { Text, View, StyleSheet, Platform } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Formik } from 'formik';
@@ -36,8 +36,11 @@ const AuthForm = ({ initialValues, validationSchema, onSubmit, fields, isPasswor
             <View key={field.name} style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.colors.text.primary, fontSize: fontSize.sm }]}>
                 {field.label}
-              </Text>              <TextInput                value={values[field.name]}
-                onChangeText={handleChange(field.name)}                style={{ 
+              </Text>
+              <TextInput
+                value={values[field.name]}
+                onChangeText={handleChange(field.name)}
+                style={{ 
                   backgroundColor: theme.colors.surface, 
                   marginBottom: 8,
                   height: 40,
@@ -52,7 +55,8 @@ const AuthForm = ({ initialValues, validationSchema, onSubmit, fields, isPasswor
                 placeholder={field.placeholder}
                 placeholderTextColor={theme.colors.text.disabled}
                 autoCapitalize={field.autoCapitalize || "none"}
-                keyboardType={field.keyboardType || "default"}                theme={paperTheme}
+                keyboardType={field.keyboardType || "default"}
+                theme={paperTheme}
                 right={
                   field.secureTextEntry ? (
                     <TextInput.Icon
