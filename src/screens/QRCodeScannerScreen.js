@@ -15,7 +15,7 @@ export default function QRCodeScanner() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [scannedData, setScannedData] = useState("");
+  const [scannedData, setScannedData] = useState({ pontos: 0, hash: null, error: null });
   const theme = useTheme();
   const { fontSize, fontFamily } = useFontSettings();
   const [token, setToken] = useState(null);
@@ -69,57 +69,105 @@ export default function QRCodeScanner() {
   };
 
   const updateUserPoints = async (pontos, hash) => {
-    if (!token) return;
+    if (!token) {
+      throw new Error("Token de autenticação não encontrado");
+    }
 
-    const currentPoints = await fetchUserPoints();
-    const newPoints = currentPoints + pontos;
+    try {
+      const currentPoints = await fetchUserPoints();
+      const newPoints = currentPoints + pontos;
 
-    await axios.put(
-      `${API_URL}/usuario/pontos`,
-      { pontos: newPoints },
-      { headers: { "access-token": token } }
-    );
+      // Atualiza pontos do usuário
+      const response = await axios.put(
+        `${API_URL}/usuario/pontos`,
+        { pontos: newPoints },
+        { headers: { "access-token": token } }
+      );
 
-    await fetch("http://localhost:4000/hist/pontos", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        _id: await AsyncStorage.getItem('user'),
-        pontos: pontos,
-        hash: hash,
-      }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Erro na requisição: ' + response.status);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Resposta:', data);
-      })
-      .catch(error => {
-        console.error('Erro:', error);
+      if (response.status !== 200) {
+        throw new Error("Erro ao atualizar pontos do usuário");
+      }
+
+      // Salva no histórico
+      const histResponse = await fetch("http://localhost:4000/hist/pontos", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: await AsyncStorage.getItem('user'),
+          pontos: pontos,
+          hash: hash,
+        }),
       });
+
+      if (!histResponse.ok) {
+        console.warn(`Erro ao salvar no histórico: ${histResponse.status}`);
+        // Não lança erro aqui pois os pontos já foram atualizados
+      } else {
+        const histData = await histResponse.json();
+        console.log('Histórico salvo:', histData);
+      }
+
+    } catch (error) {
+      console.error('Erro ao atualizar pontos:', error);
+      throw new Error("Erro ao processar pontos. Tente novamente.");
+    }
   };
 
 
 
   const handleBarCodeScanned = async ({ data }) => {
     try {
-      const parsedData = JSON.parse(data);
+      console.log("Dados brutos do QR Code:", data);
+      
+      // Verifica se os dados não estão vazios
+      if (!data || data.trim() === '') {
+        throw new Error("QR Code vazio ou inválido");
+      }
+
+      // Tenta fazer parse do JSON
+      let parsedData;
+      try {
+        parsedData = JSON.parse(data);
+      } catch (parseError) {
+        console.error("Erro ao fazer parse do JSON:", parseError);
+        throw new Error("QR Code não contém dados válidos");
+      }
+
+      // Valida se os campos obrigatórios existem
+      if (!parsedData.hash || !parsedData.pontos) {
+        throw new Error("QR Code não contém as informações necessárias (hash e pontos)");
+      }
+
+      // Valida se pontos é um número válido
+      const pontos = Number(parsedData.pontos);
+      if (isNaN(pontos) || pontos <= 0) {
+        throw new Error("Valor de pontos inválido no QR Code");
+      }
+
       setScanned(true);
-      setScannedData(parsedData); // mantenha como objeto
+      setScannedData({
+        ...parsedData,
+        pontos: pontos
+      });
 
-      console.log(parsedData.hash);
-      console.log(parsedData.pontos);
+      console.log("Hash:", parsedData.hash);
+      console.log("Pontos:", pontos);
 
-      await updateUserPoints(parsedData.pontos, parsedData.hash);
+      await updateUserPoints(pontos, parsedData.hash);
       setAlertVisible(true);
+      
     } catch (error) {
       console.error("Erro ao processar QR Code:", error);
+      setScanned(true);
+      
+      // Mostra um alert de erro para o usuário
+      setScannedData({
+        pontos: 0,
+        error: error.message
+      });
+      setAlertVisible(true);
     }
   };
 
@@ -154,12 +202,14 @@ export default function QRCodeScanner() {
 
       <CustomAlert
         visible={alertVisible}
-        title="QR Code Escaneado"
-        message={`Você recebeu ${scannedData.pontos} pontos!`}
+        title={scannedData.error ? "Erro no QR Code" : "QR Code Escaneado"}
+        message={scannedData.error ? scannedData.error : `Você recebeu ${scannedData.pontos} pontos!`}
         onClose={() => {
           setAlertVisible(false);
           setScanned(false);
-          navigation.navigate('Main', { screen: 'HomeTab' });
+          if (!scannedData.error) {
+            navigation.navigate('Main', { screen: 'HomeTab' });
+          }
         }}
         onConfirm={() => {
           setAlertVisible(false);
