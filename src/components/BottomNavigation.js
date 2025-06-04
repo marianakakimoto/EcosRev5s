@@ -18,6 +18,7 @@ const BottomNavigation = ({ state, navigation }) => {
     { name: "BeneficiosTab", icon: ArrowRightLeft, label: "Troca" },
     { name: "HistoricoTab", icon: History, label: "Histórico" },
     { name: "PerfilTab", icon: UserCog, label: "Perfil" },
+    { name: "SobreTab", icon: Info, label: "Sobre" },
     { name: "MenuTab", icon: Menu, label: "Menu", isDrawer: true },
   ];
 
