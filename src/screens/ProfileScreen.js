@@ -267,6 +267,7 @@ const confirmDeleteAccount = () => {
               value={userData.nome}
               placeholder="Nome"
               placeholderTextColor={theme.colors.text.secondary}
+              editable={false}
               onChangeText={(text) => setUserData({ ...userData, nome: text })}
             />
           </View>
@@ -288,6 +289,7 @@ const confirmDeleteAccount = () => {
               value={userData.email}
               placeholder="E-mail"
               placeholderTextColor={theme.colors.text.secondary}
+              editable={false}
               onChangeText={(text) => setUserData({ ...userData, email: text })}
               keyboardType="email-address"
               autoCapitalize="none"
