@@ -148,6 +148,7 @@ const handleLogout = () => {
     onConfirm: async () => {
       try {
         await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
         navigation.navigate('Login');
       } catch (error) {
         console.error('Erro ao remover token:', error);

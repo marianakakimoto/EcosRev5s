@@ -18,6 +18,7 @@ const LogoutButton = () => {
   const confirmExit = async () => {
     try {
       await AsyncStorage.removeItem("token"); // Remova aqui o item que você salvou no login
+      await AsyncStorage.removeItem("user")
     } catch (e) {
       console.error("Erro ao remover token do AsyncStorage", e);
     } finally {
