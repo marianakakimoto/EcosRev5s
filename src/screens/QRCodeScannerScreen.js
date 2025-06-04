@@ -1,6 +1,6 @@
 //src\screens\QRCodeScannerScreen.js
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
@@ -8,6 +8,7 @@ import CustomAlert from '../components/CustomAlert';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from "@env";
 
 export default function QRCodeScanner() {
@@ -126,6 +127,18 @@ export default function QRCodeScanner() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Botão de voltar */}
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons 
+          name="arrow-back" 
+          size={24} 
+          color={theme.colors.text.primary} 
+        />
+      </TouchableOpacity>
+
       <CameraView
         style={styles.camera}
         facing="back"
@@ -162,6 +175,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
   },
   camera: {
     width: '100%',
