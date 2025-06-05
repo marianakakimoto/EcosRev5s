@@ -1,5 +1,5 @@
 # 
-<img src="capa.png" alt="Banner para Site Sua Nova Sombra Roxo e Azul Moderno Delicado" style="border-radius: 200px; width: 100%; height: auto;">
+<img src="./assets/banner.png" alt="Banner para Site Sua Nova Sombra Roxo e Azul Moderno Delicado" style="border-radius: 200px; width: 100%; height: auto;">
 
 ## Índice
 - [Sobre o Projeto](#-ecosrev--seu-app-para-descarte-consciente-de-resíduos-eletrônicos)
@@ -263,19 +263,22 @@ Acesse o protótipo no Figma:
 
 ---
 
-## ☁ Futuras Implementações
+## ☁ Computação em Nuvem
 
-- Utilização de banco de dados (BD) não relacional.
-- Utilizar um BD relacional na AWS.
-- Adicionar feature para armazenar informações em um BD relacional.
-- Deploy do backend e frontend na AWS.
-- Integração entre backend, frontend e bancos de dados (relacional e não relacional) na AWS.
-- Feature para realizar uploads de objetos.
-- Armazenamento de objetos no Amazon S3.
-- Utilizar API Gateway para gerenciar as requisições.
-- Documentar a implementação realizada.
-- Estimativa de custo para a arquitetura realizada.
-- Gestão dos custos de utilização da AWS.
+| Implementações                                                                 | Implementado | Implementação Futura |
+|--------------------------------------------------------------------------------|--------------|------------------------|
+| Utilização de banco de dados (BD) não relacional.                             |              | ✅                     |
+| Utilizar um BD relacional na AWS.                                             | ✅           |                        |
+| Adicionar feature para armazenar informações em um BD relacional.            | ✅           |                        |
+| Deploy do backend e frontend na AWS.                                          |              | ✅                     |
+| Integração entre backend, frontend e bancos de dados (relacional e não relacional) na AWS. |              | ✅                     |
+| Feature para realizar uploads de objetos.                                     |              | ✅                     |
+| Armazenamento de objetos no Amazon S3.                                        |              | ✅                     |
+| Utilizar API Gateway para gerenciar as requisições.                           |              | ✅                     |
+| Documentar a implementação realizada.                                         |              | ✅                     |
+| Estimativa de custo para a arquitetura realizada.                             |              | ✅                     |
+| Gestão dos custos de utilização da AWS.                                       |              | ✅                     |
+
   
 ## 🔐 Análise de Segurança:
 
