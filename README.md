@@ -67,10 +67,6 @@ O aplicativo foi desenvolvido como parte do projeto da disciplina de Laboratóri
 ![mysql2](https://img.shields.io/badge/mysql2-%23007FFF?style=flat&logo=mysql&logoColor=white) 
 ![mongodb](https://img.shields.io/badge/mongodb-%2347A248?style=flat&logo=mongodb&logoColor=white)
 
-### 📆 Datas e Timezones
-![date-fns](https://img.shields.io/badge/date--fns-%23000000?style=flat) 
-![date-fns-tz](https://img.shields.io/badge/date--fns--tz-%23000000?style=flat)
-
 ### 💌 Email
 ![nodemailer](https://img.shields.io/badge/nodemailer-%23000000?style=flat)
 
