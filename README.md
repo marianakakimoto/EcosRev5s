@@ -8,6 +8,8 @@
 - [Requisitos Funcionais](#-requisitos-funcionais)
 - [Requisitos Não Funcionais](#-requisitos-não-funcionais)
 - [Protótipo](#-protótipo)
+- [Computação em Nuvem](#-computação-em-nuvem)
+- [Análise de Segurança](#-análise-de-segurança)
 - [Equipe](#-desenvolvedores)
 
 ## 📱 Ecosrev — Seu app para descarte consciente de resíduos eletrônicos
