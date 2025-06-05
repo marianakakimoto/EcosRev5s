@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { House, ArrowRightLeft, History, UserCog, Menu } from "lucide-react-native";
+import { House, ArrowRightLeft, History, UserCog, Menu, Info } from "lucide-react-native";
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from "../contexts/FontContext";
