@@ -8,6 +8,8 @@
 - [Requisitos Funcionais](#-requisitos-funcionais)
 - [Requisitos Não Funcionais](#-requisitos-não-funcionais)
 - [Protótipo](#-protótipo)
+- [Computação em Nuvem](#-computação-em-nuvem)
+- [Análise de Segurança](#-análise-de-segurança)
 - [Equipe](#-desenvolvedores)
 
 ## 📱 Ecosrev — Seu app para descarte consciente de resíduos eletrônicos
@@ -28,17 +30,12 @@ O aplicativo foi desenvolvido como parte do projeto da disciplina de Laboratóri
 ![React Native Web](https://img.shields.io/badge/React_Native_Web-%2300D8FF?style=flat&logo=react&logoColor=white)
 
 ### 🎨 Estilização e UI
-![React Native Paper](https://img.shields.io/badge/React_Native_Paper-%2300BCD4?style=flat) 
-![Expo Linear Gradient](https://img.shields.io/badge/Expo_Linear_Gradient-%23009688?style=flat) 
-![Expo Font](https://img.shields.io/badge/Expo_Font-%23008CFF?style=flat) 
+![React Native Paper](https://img.shields.io/badge/React_Native_Paper-%2300BCD4?style=flat)
 ![Google Fonts](https://img.shields.io/badge/Google_Fonts-%23EA4335?style=flat&logo=google&logoColor=white) 
 ![Lucide](https://img.shields.io/badge/Lucide-%23000000?style=flat&logo=github&logoColor=white)
 
 ### 🔧 Navegação
 ![React Navigation](https://img.shields.io/badge/React_Navigation-%23FF6E40?style=flat) 
-![Gesture Handler](https://img.shields.io/badge/React_Native_Gesture_Handler-%2300CFFF?style=flat) 
-![React Native Screens](https://img.shields.io/badge/React_Native_Screens-%2300CFFF?style=flat) 
-![Safe Area Context](https://img.shields.io/badge/React_Native_Safe_Area_Context-%2300CFFF?style=flat)
 
 ### 🗂️ Gerenciamento de Dados e Configurações
 ![Async Storage](https://img.shields.io/badge/@react_native_async_storage-000000?style=flat) 
@@ -52,14 +49,9 @@ O aplicativo foi desenvolvido como parte do projeto da disciplina de Laboratóri
 ![Expo Camera](https://img.shields.io/badge/Expo_Camera-%23009688?style=flat) 
 ![React Native SVG](https://img.shields.io/badge/React_Native_SVG-%2300CFFF?style=flat) 
 ![SVG Transformer](https://img.shields.io/badge/SVG_Transformer-%2300CFFF?style=flat) 
-![React Native Pager View](https://img.shields.io/badge/React_Native_Pager_View-%2300CFFF?style=flat)
 
 ### 🔗 Comunicação com API
 ![Axios](https://img.shields.io/badge/Axios-%230072B1?style=flat)
-
-### 🏗️ Desenvolvimento e Scripts
-![Concurrently](https://img.shields.io/badge/Concurrently-%23000000?style=flat) 
-![Babel](https://img.shields.io/badge/@babel/core-%23F9DC3E?style=flat&logo=babel&logoColor=black)
 
 ## 🚀 Tecnologias Backend
 
@@ -75,10 +67,6 @@ O aplicativo foi desenvolvido como parte do projeto da disciplina de Laboratóri
 ![mysql2](https://img.shields.io/badge/mysql2-%23007FFF?style=flat&logo=mysql&logoColor=white) 
 ![mongodb](https://img.shields.io/badge/mongodb-%2347A248?style=flat&logo=mongodb&logoColor=white)
 
-### 📆 Datas e Timezones
-![date-fns](https://img.shields.io/badge/date--fns-%23000000?style=flat) 
-![date-fns-tz](https://img.shields.io/badge/date--fns--tz-%23000000?style=flat)
-
 ### 💌 Email
 ![nodemailer](https://img.shields.io/badge/nodemailer-%23000000?style=flat)
 
@@ -92,10 +80,6 @@ O aplicativo foi desenvolvido como parte do projeto da disciplina de Laboratóri
 
 ### 🔐 Variáveis de Ambiente
 ![dotenv](https://img.shields.io/badge/dotenv-%23000000?style=flat)
-
-### 🧪 Testes
-![jest](https://img.shields.io/badge/jest-%23C21325?style=flat&logo=jest&logoColor=white) 
-![supertest](https://img.shields.io/badge/supertest-%23000000?style=flat)
 
 ### 🚀 Desenvolvimento
 ![nodemon](https://img.shields.io/badge/nodemon-%2300C600?style=flat&logo=nodemon&logoColor=white)
