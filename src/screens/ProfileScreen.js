@@ -15,7 +15,7 @@ import { API_URL } from "@env";
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const theme = useTheme();
-  const { fontSize } = useFontSettings();  const [userData, setUserData] = useState({
+  const { fontSize } = useFontSettings(); const [userData, setUserData] = useState({
     _id: '',
     nome: '',
     email: '',
@@ -32,18 +32,18 @@ export default function ProfileScreen() {
     message: '',
     confirmText: '',
     cancelText: '',
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
     confirmColor: '',
     showCancelButton: true,
   });
 
-useFocusEffect(
-  React.useCallback(() => {
-    fetchUserData();
-    fetchUserPoints();
-  }, [])
-);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserData();
+      fetchUserPoints();
+    }, [])
+  );
 
   const fetchUserPoints = async () => {
     try {
@@ -73,13 +73,13 @@ useFocusEffect(
           'access-token': await AsyncStorage.getItem('token')
         },
       });
-  
+
       if (!response.ok) {
         throw new Error('Erro ao buscar usuário');
       }
       const data = await response.json();
       const user = Array.isArray(data.results) ? data.results[0] : data; // adapte se a estrutura do retorno for diferente
-      
+
       setUserData(prevData => ({
         ...prevData,
         _id: user._id,
@@ -107,15 +107,15 @@ useFocusEffect(
       setIsLoading(false);
     }
   };
-  
+
   // Função genérica para mostrar alertas, com controle de botão único e callback de cancelamento
   const showAlert = ({
     title,
     message,
     confirmText = 'OK',
     cancelText = 'Cancelar',
-    onConfirm = () => {},
-    onCancel = () => {},
+    onConfirm = () => { },
+    onCancel = () => { },
     confirmColor = theme.colors.primary,
     showCancelButton = true
   }) => {
@@ -130,104 +130,104 @@ useFocusEffect(
       onConfirm: () => {
         setAlertConfig((prev) => ({ ...prev, visible: false }));
         onConfirm();
-      },      onCancel: () => {
+      }, onCancel: () => {
         setAlertConfig((prev) => ({ ...prev, visible: false }));
         if (onCancel) onCancel();
       }
     });
   };
 
-const handleLogout = () => {
-  showAlert({
-    title: 'Confirmar Saída',
-    message: 'Tem certeza que deseja sair da conta?',
-    confirmText: 'Sair',
-    cancelText: 'Cancelar',
-    confirmColor: theme.colors.error,
-    showCancelButton: true,
-    onConfirm: async () => {
-      try {
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('user');
-        navigation.navigate('Login');
-      } catch (error) {
-        console.error('Erro ao remover token:', error);
-      }
-    },
-  });
-};
-
-const handleDeleteAccount = async () => {
-  // Verifica se o usuário tem pontos
-  if (userData.pontos > 0) {
+  const handleLogout = () => {
     showAlert({
-      title: 'Atenção',
-      message: `Você ainda possui ${userData.pontos} pontos. Deseja trocar seus pontos por benefícios antes de apagar sua conta?`,
-      confirmText: 'Trocar Pontos',
-      cancelText: 'Apagar Mesmo Assim',
-      confirmColor: theme.colors.primary,
+      title: 'Confirmar Saída',
+      message: 'Tem certeza que deseja sair da conta?',
+      confirmText: 'Sair',
+      cancelText: 'Cancelar',
+      confirmColor: theme.colors.error,
       showCancelButton: true,
-      onConfirm: () => {
-        // Navega para a tela de benefícios para trocar os pontos
-        navigation.navigate('Main', { screen: 'BenefitsTab' });
+      onConfirm: async () => {
+        try {
+          await AsyncStorage.removeItem('token');
+          await AsyncStorage.removeItem('user');
+          navigation.navigate('Login');
+        } catch (error) {
+          console.error('Erro ao remover token:', error);
+        }
       },
-      onCancel: () => {
-        // Prossegue com a exclusão mesmo tendo pontos
-        confirmDeleteAccount();
+    });
+  };
+
+  const handleDeleteAccount = async () => {
+    // Verifica se o usuário tem pontos
+    if (userData.pontos > 0) {
+      showAlert({
+        title: 'Atenção',
+        message: `Você ainda possui ${userData.pontos} pontos. Deseja trocar seus pontos por benefícios antes de apagar sua conta?`,
+        confirmText: 'Trocar Pontos',
+        cancelText: 'Apagar Mesmo Assim',
+        confirmColor: theme.colors.primary,
+        showCancelButton: true,
+        onConfirm: () => {
+          // Navega para a tela de benefícios para trocar os pontos
+          navigation.navigate('Main', { screen: 'BenefitsTab' });
+        },
+        onCancel: () => {
+          // Prossegue com a exclusão mesmo tendo pontos
+          confirmDeleteAccount();
+        }
+      });
+    } else {
+      // Se não tem pontos, apenas pergunta se tem certeza
+      confirmDeleteAccount();
+    }
+  };
+
+  const confirmDeleteAccount = () => {
+    showAlert({
+      title: 'Apagar Conta',
+      message: 'Tem certeza que deseja apagar sua conta? Esta ação não pode ser desfeita.',
+      confirmText: 'Apagar',
+      cancelText: 'Cancelar',
+      confirmColor: theme.colors.error,
+      showCancelButton: true,
+      onConfirm: async () => {
+        try {
+          const token = await AsyncStorage.getItem('token');
+          if (!token) return;
+
+          // Obtem o ID do usuário do token
+          const userId = userData._id;
+
+          // Faz a requisição DELETE para apagar a conta
+          await axios.delete(`${API_URL}/usuario/${userId}`, {
+            headers: { "access-token": token }
+          });
+
+          // Remove o token e navega para a tela de login
+          await AsyncStorage.removeItem('token');
+          showAlert({
+            title: 'Sucesso',
+            message: 'Sua conta foi apagada com sucesso.',
+            confirmText: 'OK',
+            confirmColor: theme.colors.success || theme.colors.primary,
+            showCancelButton: false,
+            onConfirm: () => {
+              navigation.navigate('Login');
+            }
+          });
+        } catch (error) {
+          console.error('Erro ao apagar conta:', error);
+          showAlert({
+            title: 'Erro',
+            message: 'Não foi possível apagar sua conta. Tente novamente mais tarde.',
+            confirmText: 'OK',
+            confirmColor: theme.colors.error,
+            showCancelButton: false
+          });
+        }
       }
     });
-  } else {
-    // Se não tem pontos, apenas pergunta se tem certeza
-    confirmDeleteAccount();
-  }
-};
-
-const confirmDeleteAccount = () => {
-  showAlert({
-    title: 'Apagar Conta',
-    message: 'Tem certeza que deseja apagar sua conta? Esta ação não pode ser desfeita.',
-    confirmText: 'Apagar',
-    cancelText: 'Cancelar',
-    confirmColor: theme.colors.error,
-    showCancelButton: true,
-    onConfirm: async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) return;
-        
-        // Obtem o ID do usuário do token
-        const userId = userData._id;
-        
-        // Faz a requisição DELETE para apagar a conta
-        await axios.delete(`${API_URL}/usuario/${userId}`, {
-          headers: { "access-token": token }
-        });
-        
-        // Remove o token e navega para a tela de login
-        await AsyncStorage.removeItem('token');
-        showAlert({
-          title: 'Sucesso',
-          message: 'Sua conta foi apagada com sucesso.',
-          confirmText: 'OK',
-          confirmColor: theme.colors.success || theme.colors.primary,
-          showCancelButton: false,
-          onConfirm: () => {
-            navigation.navigate('Login');
-          }
-        });
-      } catch (error) {
-        console.error('Erro ao apagar conta:', error);
-        showAlert({
-          title: 'Erro',
-          message: 'Não foi possível apagar sua conta. Tente novamente mais tarde.',
-          confirmText: 'OK',
-          confirmColor: theme.colors.error,
-          showCancelButton: false
-        });
-      }
-    }
-  });
-};
+  };
 
   return (
     <ScrollView
@@ -307,7 +307,8 @@ const confirmDeleteAccount = () => {
                 Alterar Senha
               </Text>
             </TouchableOpacity>
-          </View>        </View>
+          </View>
+        </View>
         <TouchableOpacity
           style={[styles.logoutButton, { borderColor: theme.colors.error }]}
           onPress={handleLogout}
@@ -317,7 +318,7 @@ const confirmDeleteAccount = () => {
             Logout
           </Text>
         </TouchableOpacity>
-        
+
         {/* Link apagar conta */}
         <TouchableOpacity
           style={styles.deleteAccountLink}
@@ -337,7 +338,7 @@ const confirmDeleteAccount = () => {
           showAlert({
             title: 'Sucesso',
             message: 'Senha alterada com sucesso.',
-            confirmColor: theme.colors.sucess,
+            confirmColor: theme.colors.success,
             showCancelButton: false,
           });
           setShowPasswordModal(false);
@@ -345,7 +346,7 @@ const confirmDeleteAccount = () => {
         theme={theme}
         fontSize={fontSize}
         showAlert={showAlert}
-      />      {/* CustomAlert Component */}
+      />
       <CustomAlert
         visible={alertConfig.visible}
         title={alertConfig.title}
@@ -443,10 +444,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 10,
     borderWidth: 2,
-  },  logoutText: {
+  }, logoutText: {
     marginLeft: 10,
     fontWeight: 'bold',
-  },  deleteAccountLink: {
+  }, deleteAccountLink: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,

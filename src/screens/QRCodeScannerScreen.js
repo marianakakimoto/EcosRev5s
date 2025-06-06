@@ -1,6 +1,6 @@
 //src\screens\QRCodeScannerScreen.js
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Button } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
@@ -8,14 +8,13 @@ import CustomAlert from '../components/CustomAlert';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from "@env";
+import { API_URL, API_BASE_URL } from "@env";
 
 export default function QRCodeScanner() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [scannedData, setScannedData] = useState({ pontos: 0, hash: null, error: null });
+  const [scannedData, setScannedData] = useState("");
   const theme = useTheme();
   const { fontSize, fontFamily } = useFontSettings();
   const [token, setToken] = useState(null);
@@ -69,105 +68,57 @@ export default function QRCodeScanner() {
   };
 
   const updateUserPoints = async (pontos, hash) => {
-    if (!token) {
-      throw new Error("Token de autenticação não encontrado");
-    }
+    if (!token) return;
 
-    try {
-      const currentPoints = await fetchUserPoints();
-      const newPoints = currentPoints + pontos;
+    const currentPoints = await fetchUserPoints();
+    const newPoints = currentPoints + pontos;
 
-      // Atualiza pontos do usuário
-      const response = await axios.put(
-        `${API_URL}/usuario/pontos`,
-        { pontos: newPoints },
-        { headers: { "access-token": token } }
-      );
+    await axios.put(
+      `${API_URL}/usuario/pontos`,
+      { pontos: newPoints },
+      { headers: { "access-token": token } }
+    );
 
-      if (response.status !== 200) {
-        throw new Error("Erro ao atualizar pontos do usuário");
-      }
-
-      // Salva no histórico
-      const histResponse = await fetch("http://localhost:4000/hist/pontos", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: await AsyncStorage.getItem('user'),
-          pontos: pontos,
-          hash: hash,
-        }),
+    await fetch(`${API_BASE_URL}/hist/pontos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        _id: await AsyncStorage.getItem('user'),
+        pontos: pontos,
+        hash: hash,
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro na requisição: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Resposta:', data);
+      })
+      .catch(error => {
+        console.error('Erro:', error);
       });
-
-      if (!histResponse.ok) {
-        console.warn(`Erro ao salvar no histórico: ${histResponse.status}`);
-        // Não lança erro aqui pois os pontos já foram atualizados
-      } else {
-        const histData = await histResponse.json();
-        console.log('Histórico salvo:', histData);
-      }
-
-    } catch (error) {
-      console.error('Erro ao atualizar pontos:', error);
-      throw new Error("Erro ao processar pontos. Tente novamente.");
-    }
   };
 
 
 
   const handleBarCodeScanned = async ({ data }) => {
     try {
-      console.log("Dados brutos do QR Code:", data);
-      
-      // Verifica se os dados não estão vazios
-      if (!data || data.trim() === '') {
-        throw new Error("QR Code vazio ou inválido");
-      }
-
-      // Tenta fazer parse do JSON
-      let parsedData;
-      try {
-        parsedData = JSON.parse(data);
-      } catch (parseError) {
-        console.error("Erro ao fazer parse do JSON:", parseError);
-        throw new Error("QR Code não contém dados válidos");
-      }
-
-      // Valida se os campos obrigatórios existem
-      if (!parsedData.hash || !parsedData.pontos) {
-        throw new Error("QR Code não contém as informações necessárias (hash e pontos)");
-      }
-
-      // Valida se pontos é um número válido
-      const pontos = Number(parsedData.pontos);
-      if (isNaN(pontos) || pontos <= 0) {
-        throw new Error("Valor de pontos inválido no QR Code");
-      }
-
+      const parsedData = JSON.parse(data);
       setScanned(true);
-      setScannedData({
-        ...parsedData,
-        pontos: pontos
-      });
+      setScannedData(parsedData); // mantenha como objeto
 
-      console.log("Hash:", parsedData.hash);
-      console.log("Pontos:", pontos);
+      console.log(parsedData.hash);
+      console.log(parsedData.pontos);
 
-      await updateUserPoints(pontos, parsedData.hash);
+      await updateUserPoints(parsedData.pontos, parsedData.hash);
       setAlertVisible(true);
-      
     } catch (error) {
       console.error("Erro ao processar QR Code:", error);
-      setScanned(true);
-      
-      // Mostra um alert de erro para o usuário
-      setScannedData({
-        pontos: 0,
-        error: error.message
-      });
-      setAlertVisible(true);
     }
   };
 
@@ -175,18 +126,6 @@ export default function QRCodeScanner() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Botão de voltar */}
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons 
-          name="arrow-back" 
-          size={24} 
-          color={theme.colors.text.primary} 
-        />
-      </TouchableOpacity>
-
       <CameraView
         style={styles.camera}
         facing="back"
@@ -202,14 +141,12 @@ export default function QRCodeScanner() {
 
       <CustomAlert
         visible={alertVisible}
-        title={scannedData.error ? "Erro no QR Code" : "QR Code Escaneado"}
-        message={scannedData.error ? scannedData.error : `Você recebeu ${scannedData.pontos} pontos!`}
+        title="QR Code Escaneado"
+        message={`Você recebeu ${scannedData.pontos} pontos!`}
         onClose={() => {
           setAlertVisible(false);
           setScanned(false);
-          if (!scannedData.error) {
-            navigation.navigate('Main', { screen: 'HomeTab' });
-          }
+          navigation.navigate('Main', { screen: 'HomeTab' });
         }}
         onConfirm={() => {
           setAlertVisible(false);
@@ -225,15 +162,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
-    padding: 8,
   },
   camera: {
     width: '100%',

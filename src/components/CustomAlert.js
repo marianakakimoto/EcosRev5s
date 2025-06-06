@@ -3,12 +3,12 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions }
 import { useTheme } from "../contexts/ThemeContext";
 import { useFontSettings } from "../contexts/FontContext";
 
-const CustomAlert = ({ 
-  visible, 
-  onClose, 
+const CustomAlert = ({
+  visible,
+  onClose,
   onConfirm,
   onCancel,
-  title, 
+  title,
   message,
   cancelText = "Cancelar",
   confirmText = "Confirmar",
@@ -92,19 +92,20 @@ const CustomAlert = ({
             !showCancelButton && styles.singleButtonContainer
           ]}>
             {showCancelButton ? (
-              <>                <TouchableOpacity
+              <>
+                <TouchableOpacity
                   style={[
-                    styles.button, 
+                    styles.button,
                     styles.cancelButton,
                     { borderColor: buttonCancelColor }
                   ]}
                   onPress={onCancel || onClose}
                   activeOpacity={0.7}
                 >
-                  <Text 
-                    style={{ 
-                      color: buttonCancelColor, 
-                      fontSize: fontSize.md, 
+                  <Text
+                    style={{
+                      color: buttonCancelColor,
+                      fontSize: fontSize.md,
                       fontFamily,
                       fontWeight: '500'
                     }}
@@ -115,19 +116,19 @@ const CustomAlert = ({
 
                 <TouchableOpacity
                   style={[
-                    styles.button, 
+                    styles.button,
                     styles.confirmButton,
                     { backgroundColor: buttonConfirmColor }
                   ]}
                   onPress={onConfirm}
                   activeOpacity={0.7}
                 >
-                  <Text 
-                    style={{ 
-                      color: colors.onError, 
-                      fontSize: fontSize.md, 
+                  <Text
+                    style={{
+                      color: colors.text.primary,
+                      fontSize: fontSize.md,
                       fontFamily,
-                      fontWeight: '600' 
+                      fontWeight: '600'
                     }}
                   >
                     {confirmText}
@@ -137,19 +138,19 @@ const CustomAlert = ({
             ) : (
               <TouchableOpacity
                 style={[
-                  styles.button, 
+                  styles.button,
                   styles.singleButton,
                   { backgroundColor: buttonConfirmColor }
                 ]}
                 onPress={onConfirm || onClose} // Usa onConfirm se estiver definido, senão usa onClose
                 activeOpacity={0.7}
               >
-                <Text 
-                  style={{ 
-                    color: colors.onError, 
-                    fontSize: fontSize.md, 
+                <Text
+                  style={{
+                    color: colors.onError,
+                    fontSize: fontSize.md,
                     fontFamily,
-                    fontWeight: '600' 
+                    fontWeight: '600'
                   }}
                 >
                   {singleButtonText}

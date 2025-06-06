@@ -6,9 +6,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFontSettings } from '../contexts/FontContext';
 import { ArrowUp, ArrowDown } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {API_BASE_URL } from "@env";
 
-// Você precisa definir sua URL base da API
-const API_BASE_URL = 'http://localhost:4000'; // Substitua pela sua URL
+// Você precisa definir sua URL base da AP; // Substitua pela sua URL
 
 const groupByMonth = (data) => {
   const grouped = {};
